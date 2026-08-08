@@ -182,6 +182,7 @@
   <nav>
     <button data-view="dashboard" class="active">Dashboard</button>
     <button data-view="budgets">Budgets</button>
+    <button data-view="transactions">Transactions</button>
     <button data-view="upload">Upload</button>
     <button data-view="forecast">Forecast</button>
     <button data-view="bills">Bills</button>
@@ -193,7 +194,12 @@
     <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="card">
-        <h2>This month</h2>
+        <div class="row month-nav" style="margin-bottom:12px; align-items:center;">
+          <button class="btn secondary month-prev" style="padding:6px 10px;">‹</button>
+          <div class="month-label" style="flex:1; text-align:center; font-weight:700; font-size:13px;"></div>
+          <button class="btn secondary month-next" style="padding:6px 10px;">›</button>
+        </div>
+        <h2>Month summary</h2>
         <div class="ring-wrap">
           <div class="ring" id="dash-ring"><div class="num" id="dash-ring-num">–</div></div>
           <div>
@@ -215,11 +221,35 @@
     <!-- BUDGETS -->
     <section class="view" id="view-budgets">
       <div class="card">
+        <div class="row month-nav" style="margin-bottom:12px; align-items:center;">
+          <button class="btn secondary month-prev" style="padding:6px 10px;">‹</button>
+          <div class="month-label" style="flex:1; text-align:center; font-weight:700; font-size:13px;"></div>
+          <button class="btn secondary month-next" style="padding:6px 10px;">›</button>
+        </div>
         <div class="row" style="margin-bottom:12px;">
           <h2 style="flex:1;">Categories &amp; budgets</h2>
           <button class="btn secondary" id="btn-add-category">+ Add category</button>
         </div>
         <div id="budget-list"><div class="empty">No categories yet — add your first one.</div></div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="view" id="view-transactions">
+      <div class="card">
+        <div class="row month-nav" style="margin-bottom:12px; align-items:center;">
+          <button class="btn secondary month-prev" style="padding:6px 10px;">‹</button>
+          <div class="month-label" style="flex:1; text-align:center; font-weight:700; font-size:13px;"></div>
+          <button class="btn secondary month-next" style="padding:6px 10px;">›</button>
+        </div>
+        <h2 style="margin-bottom:12px;">Transactions</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Category</th><th></th></tr></thead>
+            <tbody id="txn-rows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="txn-empty" style="display:none;">No transactions this month.</div>
       </div>
     </section>
 
@@ -422,12 +452,12 @@ function attachListeners(){
 
   unsubscribers.push(base.collection('categories').orderBy('order').onSnapshot(snap => {
     categories = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    renderBudgets(); renderDashboard(); renderMapSelectsIfNeeded(); renderForecast();
+    renderBudgets(); renderDashboard(); renderMapSelectsIfNeeded(); renderForecast(); renderTransactions();
   }));
 
   unsubscribers.push(base.collection('transactions').orderBy('date','desc').onSnapshot(snap => {
     transactions = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    renderBudgets(); renderDashboard(); renderForecast();
+    renderBudgets(); renderDashboard(); renderForecast(); renderTransactions();
   }));
 
   unsubscribers.push(base.collection('bills').orderBy('dueDate').onSnapshot(snap => {
@@ -460,12 +490,33 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-/* ---------------------- BUDGETS ---------------------- */
+/* ---------------------- MONTH NAVIGATION ---------------------- */
+let selectedMonth = currentMonthKey();
 function currentMonthKey(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function monthLabel(mk){
+  const [y,m] = mk.split('-').map(Number);
+  return new Date(y, m-1, 1).toLocaleString('en-GB', { month:'long', year:'numeric' });
+}
+function updateMonthLabels(){
+  document.querySelectorAll('.month-label').forEach(el => el.textContent = monthLabel(selectedMonth));
+}
+function changeMonth(delta){
+  const [y,m] = selectedMonth.split('-').map(Number);
+  const d = new Date(y, m-1+delta, 1);
+  selectedMonth = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  updateMonthLabels();
+  renderDashboard(); renderBudgets(); renderTransactions();
+}
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('month-prev')) changeMonth(-1);
+  if (e.target.classList.contains('month-next')) changeMonth(1);
+});
+updateMonthLabels();
+
+/* ---------------------- BUDGETS ---------------------- */
 function actualForCategory(catName){
-  const mk = currentMonthKey();
   return transactions
-    .filter(t => t.category === catName && t.date && t.date.slice(0,7) === mk && t.amount < 0)
+    .filter(t => t.category === catName && t.date && t.date.slice(0,7) === selectedMonth && t.amount < 0)
     .reduce((s,t) => s + Math.abs(t.amount), 0);
 }
 
@@ -530,6 +581,42 @@ function renderDashboard(){
     : '<div class="empty">No bills due in the next 30 days.</div>';
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------------------- TRANSACTIONS (view / edit saved data) ---------------------- */
+function renderTransactions(){
+  const rows = transactions.filter(t => t.date && t.date.slice(0,7) === selectedMonth);
+  const el = document.getElementById('txn-rows');
+  const emptyEl = document.getElementById('txn-empty');
+  if (!rows.length){ el.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  const catOptions = ['Uncategorised', ...categories.map(c=>c.name)];
+  el.innerHTML = rows.map(t => `
+    <tr data-id="${t.id}">
+      <td><input type="date" class="txn-date mono" data-id="${t.id}" value="${escapeHtml(t.date)}" style="width:128px; padding:4px 6px;"></td>
+      <td><input type="text" class="txn-desc" data-id="${t.id}" value="${escapeHtml(t.description)}" style="min-width:140px; padding:4px 6px;"></td>
+      <td><input type="number" step="0.01" class="txn-amt mono ${t.amount<0?'amt-neg':'amt-pos'}" data-id="${t.id}" value="${t.amount.toFixed(2)}" style="width:76px; padding:4px 6px;"></td>
+      <td><select class="txn-cat" data-id="${t.id}">${catOptions.map(o=>`<option ${o===t.category?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></td>
+      <td><button class="txn-delete btn secondary" data-id="${t.id}" style="padding:4px 7px; font-size:11px; color:var(--red); border-color:var(--red);" title="Delete">✕</button></td>
+    </tr>`).join('');
+}
+
+document.getElementById('txn-rows').addEventListener('change', e => {
+  const id = e.target.dataset.id; if (!id) return;
+  const ref = usersCol().collection('transactions').doc(id);
+  if (e.target.classList.contains('txn-date')) ref.update({ date: e.target.value });
+  if (e.target.classList.contains('txn-desc')) ref.update({ description: e.target.value });
+  if (e.target.classList.contains('txn-amt')) {
+    const v = parseFloat(e.target.value) || 0;
+    ref.update({ amount: v });
+    e.target.classList.toggle('amt-neg', v < 0);
+    e.target.classList.toggle('amt-pos', v >= 0);
+  }
+  if (e.target.classList.contains('txn-cat')) ref.update({ category: e.target.value });
+});
+document.getElementById('txn-rows').addEventListener('click', e => {
+  if (!e.target.classList.contains('txn-delete')) return;
+  if (confirm('Delete this transaction?')) usersCol().collection('transactions').doc(e.target.dataset.id).delete();
+});
 
 /* ---------------------- UPLOAD / IMPORT ---------------------- */
 let rawRows = []; let rawHeaders = []; let mappedRows = [];
