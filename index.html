@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Household Finance</title>
+
+<!-- Firebase (compat SDK — simplest syntax to configure) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- PapaParse — robust CSV parsing (handles quoted fields, different delimiters) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<!-- pdf.js — extracts text from PDF statements entirely in the browser, nothing uploaded -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+
+<style>
+  :root{
+    --ink:#141c26; --ink-soft:#5a6b7a; --line:#e1e6ea; --panel:#ffffff;
+    --bg:#f7f8f9; --blue:#2f5aa8; --blue-dim:#eaf0fa;
+    --green:#1f8a52; --red:#c1440e; --red-bg:#fbeee7;
+    --radius:8px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;}
+  h1,h2,h3{margin:0; font-weight:700;}
+  input,select,button,textarea{font-family:inherit; font-size:14px;}
+  .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;}
+  button{cursor:pointer;}
+
+  /* ---------- layout ---------- */
+  #app{display:none; min-height:100vh;}
+  #app.ready{display:flex; flex-direction:column;}
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; background:var(--panel); border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:10;
+  }
+  header h1{font-size:17px; letter-spacing:-0.01em;}
+  header .user{font-size:12px; color:var(--ink-soft);}
+  header .signout{background:none; border:none; color:var(--ink-soft); font-size:12px; text-decoration:underline; margin-left:10px;}
+
+  nav{
+    display:flex; gap:2px; background:var(--panel); border-bottom:1px solid var(--line);
+    padding:0 10px; overflow-x:auto;
+  }
+  nav button{
+    background:none; border:none; padding:12px 12px; font-size:13px; font-weight:600;
+    color:var(--ink-soft); border-bottom:2px solid transparent; white-space:nowrap;
+  }
+  nav button.active{color:var(--blue); border-bottom-color:var(--blue);}
+
+  main{flex:1; padding:18px; max-width:720px; margin:0 auto; width:100%;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:14px;}
+  .card h2{font-size:14px; margin-bottom:12px;}
+  .muted{color:var(--ink-soft); font-size:12px; line-height:1.5;}
+  .row{display:flex; gap:8px; align-items:center;}
+  .row.wrap{flex-wrap:wrap;}
+  .spacer{flex:1;}
+
+  .btn{
+    background:var(--ink); color:#fff; border:none; border-radius:6px; padding:9px 14px;
+    font-size:13px; font-weight:600;
+  }
+  .btn.secondary{background:var(--panel); color:var(--ink); border:1px solid var(--line);}
+  .btn.danger{background:var(--red);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+
+  input[type=text], input[type=number], input[type=date], input[type=email], input[type=password], select, textarea{
+    border:1px solid var(--line); border-radius:6px; padding:8px 10px; width:100%; background:#fff; color:var(--ink);
+  }
+  label{font-size:11px; color:var(--ink-soft); display:block; margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:.03em;}
+  .field{margin-bottom:12px;}
+
+  /* auth */
+  #auth-screen{
+    display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;
+  }
+  #auth-screen .box{width:100%; max-width:340px;}
+  #auth-screen h1{font-size:20px; margin-bottom:4px;}
+  #auth-screen .muted{margin-bottom:20px;}
+  #auth-error{color:var(--red); font-size:12px; margin-top:8px; min-height:16px;}
+  #config-warning{
+    display:none; background:var(--red-bg); color:var(--red); border:1px solid var(--red);
+    border-radius:6px; padding:12px 14px; font-size:12px; max-width:480px; margin:40px auto; line-height:1.6;
+  }
+
+  /* dashboard */
+  .ring-wrap{display:flex; align-items:center; gap:16px; margin-bottom:6px;}
+  .ring{width:74px; height:74px; border-radius:50%; flex-shrink:0; position:relative;}
+  .ring::after{content:""; position:absolute; inset:11px; border-radius:50%; background:var(--panel);}
+  .ring .num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; z-index:1;}
+
+  /* budgets */
+  .bar-row{margin-bottom:14px;}
+  .bar-row .top{display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;}
+  .bar-row .top .name{font-weight:600;}
+  .bar-row .top .amt{color:var(--ink-soft);}
+  .bar-track{height:9px; background:#eef1f3; border-radius:4px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--blue);}
+  .bar-fill.over{background:var(--red);}
+
+  /* upload */
+  .dropzone{
+    border:2px dashed var(--line); border-radius:8px; padding:24px; text-align:center;
+    margin-bottom:14px; background:#fbfbfc;
+  }
+  .dropzone.drag{border-color:var(--blue); background:var(--blue-dim);}
+  table{width:100%; border-collapse:collapse; font-size:12px;}
+  th,td{text-align:left; padding:6px 4px; border-bottom:1px solid var(--line);}
+  th{color:var(--ink-soft); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.03em;}
+  td select{padding:4px 6px; font-size:11px;}
+  .amt-neg{color:var(--red);}
+  .amt-pos{color:var(--green);}
+
+  /* bills */
+  .bill{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .bill:last-child{border-bottom:none;}
+  .bill .name{font-weight:600; font-size:13px;}
+  .bill .sub{font-size:11px; color:var(--ink-soft);}
+  .bill .days{font-weight:700; font-size:13px;}
+  .bill .days.soon{color:var(--red);}
+  .bill .actions{display:flex; gap:6px; margin-top:4px;}
+  .bill .actions button{font-size:11px; padding:4px 8px;}
+
+  canvas{width:100%; height:180px; display:block;}
+  .toast{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:10px 16px; border-radius:6px; font-size:13px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:50;
+  }
+  .toast.show{opacity:1;}
+  .empty{color:var(--ink-soft); font-size:13px; text-align:center; padding:20px 0;}
+</style>
+</head>
+<body>
+
+<div id="config-warning"></div>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="auth-screen">
+  <div class="box">
+    <h1>Household Finance</h1>
+    <p class="muted">Private — your data only. Sign in or create an account.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="auth-email" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="auth-password" autocomplete="current-password">
+    </div>
+    <div class="row">
+      <button class="btn" id="btn-signin" style="flex:1;">Sign in</button>
+      <button class="btn secondary" id="btn-signup" style="flex:1;">Create account</button>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn secondary" id="btn-google" style="flex:1;">Continue with Google</button>
+    </div>
+    <div id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <header>
+    <h1>Household Finance</h1>
+    <div class="row">
+      <span class="user" id="user-email"></span>
+      <button class="signout" id="btn-signout">Sign out</button>
+    </div>
+  </header>
+
+  <nav>
+    <button data-view="dashboard" class="active">Dashboard</button>
+    <button data-view="budgets">Budgets</button>
+    <button data-view="upload">Upload</button>
+    <button data-view="forecast">Forecast</button>
+    <button data-view="bills">Bills</button>
+    <button data-view="settings">Settings</button>
+  </nav>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="card">
+        <h2>This month</h2>
+        <div class="ring-wrap">
+          <div class="ring" id="dash-ring"><div class="num" id="dash-ring-num">–</div></div>
+          <div>
+            <div style="font-size:20px; font-weight:700;" id="dash-spent">£0</div>
+            <div class="muted" id="dash-budget-total">of £0 budgeted</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Budget categories</h2>
+        <div id="dash-bars"><div class="empty">Add categories in Budgets to see progress here.</div></div>
+      </div>
+      <div class="card">
+        <h2>Upcoming bills</h2>
+        <div id="dash-bills"><div class="empty">No bills added yet.</div></div>
+      </div>
+    </section>
+
+    <!-- BUDGETS -->
+    <section class="view" id="view-budgets">
+      <div class="card">
+        <div class="row" style="margin-bottom:12px;">
+          <h2 style="flex:1;">Categories &amp; budgets</h2>
+          <button class="btn secondary" id="btn-add-category">+ Add category</button>
+        </div>
+        <div id="budget-list"><div class="empty">No categories yet — add your first one.</div></div>
+      </div>
+    </section>
+
+    <!-- UPLOAD -->
+    <section class="view" id="view-upload">
+      <div class="card">
+        <h2>Import a statement</h2>
+        <p class="muted" style="margin-bottom:12px;">
+          Everything happens in your browser. The file is read, matched to categories, and then discarded —
+          only the transactions you confirm below are saved. Nothing is uploaded anywhere.
+        </p>
+        <div class="dropzone" id="dropzone">
+          <div class="muted" style="margin-bottom:10px;">Drop a CSV or PDF statement here, or</div>
+          <input type="file" id="file-input" accept=".csv,text/csv,.pdf,application/pdf" style="display:none;">
+          <button class="btn secondary" id="btn-browse">Choose file</button>
+        </div>
+        <p class="muted" id="pdf-warning" style="display:none; margin-bottom:10px;"></p>
+        <details style="margin-bottom:10px;">
+          <summary class="muted" style="cursor:pointer;">No CSV export? Paste transactions instead</summary>
+          <div class="field" style="margin-top:10px;">
+            <label>Paste lines — one per transaction (date, description, amount)</label>
+            <textarea id="paste-input" rows="5" placeholder="01/08/2026, TESCO STORES, -41.20"></textarea>
+            <button class="btn secondary" style="margin-top:8px;" id="btn-parse-paste">Parse pasted text</button>
+          </div>
+        </details>
+        <div id="upload-map" style="display:none;">
+          <div class="row wrap" style="margin-bottom:10px; gap:14px;">
+            <div style="flex:1; min-width:120px;">
+              <label>Date column</label>
+              <select id="map-date"></select>
+            </div>
+            <div style="flex:1; min-width:120px;">
+              <label>Description column</label>
+              <select id="map-desc"></select>
+            </div>
+            <div style="flex:1; min-width:120px;">
+              <label>Amount column</label>
+              <select id="map-amount"></select>
+            </div>
+          </div>
+          <button class="btn secondary" id="btn-apply-map">Apply mapping to preview</button>
+        </div>
+      </div>
+
+      <div class="card" id="preview-card" style="display:none;">
+        <h2>Preview — check categories before saving</h2>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th></th><th>Category</th></tr></thead>
+            <tbody id="preview-rows"></tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <span class="muted" id="preview-count"></span>
+          <div class="spacer"></div>
+          <button class="btn secondary" id="btn-cancel-import">Cancel</button>
+          <button class="btn" id="btn-confirm-import">Save transactions</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORECAST -->
+    <section class="view" id="view-forecast">
+      <div class="card">
+        <h2>Savings forecast</h2>
+        <div class="row" style="margin-bottom:12px;">
+          <button class="btn secondary yr-btn" data-yr="1">1 yr</button>
+          <button class="btn secondary yr-btn" data-yr="3">3 yr</button>
+          <button class="btn yr-btn" data-yr="5">5 yr</button>
+        </div>
+        <canvas id="forecast-canvas"></canvas>
+        <div class="row wrap" style="margin-top:14px; gap:14px;">
+          <div style="flex:1; min-width:140px;">
+            <label>Monthly income (household)</label>
+            <input type="number" id="forecast-income" placeholder="e.g. 4200">
+          </div>
+          <div style="flex:1; min-width:140px;">
+            <label>Starting savings balance</label>
+            <input type="number" id="forecast-start" placeholder="e.g. 5000">
+          </div>
+        </div>
+        <p class="muted" style="margin-top:10px;">
+          Projection = starting balance + (income − your average actual monthly spend, from saved transactions) × months.
+          It updates as you import more statements and the average gets more accurate.
+        </p>
+      </div>
+    </section>
+
+    <!-- BILLS -->
+    <section class="view" id="view-bills">
+      <div class="card">
+        <div class="row" style="margin-bottom:12px;">
+          <h2 style="flex:1;">Bills &amp; subscriptions</h2>
+          <button class="btn secondary" id="btn-add-bill">+ Add bill</button>
+        </div>
+        <div id="bill-list"><div class="empty">No bills added yet.</div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings">
+      <div class="card">
+        <h2>Account</h2>
+        <p class="muted" id="settings-uid"></p>
+        <p class="muted" id="settings-status" style="margin-top:6px;"></p>
+      </div>
+      <div class="card">
+        <h2>Notifications</h2>
+        <p class="muted" style="margin-bottom:10px;">
+          Browser notifications only work while this app is open in a tab (a static site can't push
+          alerts when closed — that needs a small server component, which isn't set up here).
+        </p>
+        <button class="btn secondary" id="btn-notif-permission">Enable browser notifications</button>
+        <span class="muted mono" id="notif-status" style="margin-left:8px;"></span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   FIREBASE CONFIG — paste the values from your Firebase project here
+   (Project settings → General → Your apps → SDK setup and config)
+   These values are not secret — they identify your project, they don't
+   grant access. Access control is done by Firestore security rules.
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDO_KYoB1t5Azg-pnlgqcPT_f0AxpdSCp4",
+  authDomain: "household-finances-ab971.firebaseapp.com",
+  projectId: "household-finances-ab971",
+  storageBucket: "household-finances-ab971.firebasestorage.app",
+  messagingSenderId: "248832162844",
+  appId: "1:248832162844:web:8d4432fac7e1106015b3d9"
+};
+
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+  document.getElementById('config-warning').style.display = 'block';
+  document.getElementById('config-warning').innerHTML =
+    '<b>Setup needed:</b> open this file and replace the placeholder values in <code>firebaseConfig</code> ' +
+    'near the bottom of the file with your real Firebase project config, then reload.';
+} else {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = () => firebase.auth();
+const db = () => firebase.firestore();
+let uid = null;
+let unsubscribers = [];
+
+// live data caches
+let categories = [];   // {id, name, budget, keywords[]}
+let transactions = []; // {id, date, description, amount, category}
+let bills = [];        // {id, name, amount, dueDate, leadDays, recurrence}
+let settingsDoc = { monthlyIncome: null, startBalance: null };
+
+/* ---------------------- AUTH ---------------------- */
+document.getElementById('btn-signin').onclick = () => {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  auth().signInWithEmailAndPassword(email, pw).catch(showAuthError);
+};
+document.getElementById('btn-signup').onclick = () => {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  auth().createUserWithEmailAndPassword(email, pw).catch(showAuthError);
+};
+document.getElementById('btn-signout').onclick = () => auth().signOut();
+document.getElementById('btn-google').onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth().signInWithPopup(provider).catch(showAuthError);
+};
+function showAuthError(err){ document.getElementById('auth-error').textContent = err.message; }
+
+if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+  auth().onAuthStateChanged(user => {
+    if (user) {
+      uid = user.uid;
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').classList.add('ready');
+      document.getElementById('user-email').textContent = user.email;
+      document.getElementById('settings-uid').textContent = 'Signed in as ' + user.email;
+      document.getElementById('settings-status').textContent = 'Firestore connected — project: ' + firebaseConfig.projectId;
+      attachListeners();
+    } else {
+      uid = null;
+      unsubscribers.forEach(u => u());
+      unsubscribers = [];
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('app').classList.remove('ready');
+    }
+  });
+}
+
+/* ---------------------- FIRESTORE LISTENERS ---------------------- */
+function attachListeners(){
+  const base = db().collection('users').doc(uid);
+
+  unsubscribers.push(base.collection('categories').orderBy('order').onSnapshot(snap => {
+    categories = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    renderBudgets(); renderDashboard(); renderMapSelectsIfNeeded(); renderForecast();
+  }));
+
+  unsubscribers.push(base.collection('transactions').orderBy('date','desc').onSnapshot(snap => {
+    transactions = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    renderBudgets(); renderDashboard(); renderForecast();
+  }));
+
+  unsubscribers.push(base.collection('bills').orderBy('dueDate').onSnapshot(snap => {
+    bills = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    renderBills(); renderDashboard();
+  }));
+
+  unsubscribers.push(base.collection('settings').doc('profile').onSnapshot(snap => {
+    settingsDoc = snap.exists ? snap.data() : {};
+    if (settingsDoc.monthlyIncome) document.getElementById('forecast-income').value = settingsDoc.monthlyIncome;
+    if (settingsDoc.startBalance) document.getElementById('forecast-start').value = settingsDoc.startBalance;
+    renderForecast();
+  }));
+}
+function usersCol(){ return db().collection('users').doc(uid); }
+
+/* ---------------------- NAV ---------------------- */
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  };
+});
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------------------- BUDGETS ---------------------- */
+function currentMonthKey(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function actualForCategory(catName){
+  const mk = currentMonthKey();
+  return transactions
+    .filter(t => t.category === catName && t.date && t.date.slice(0,7) === mk && t.amount < 0)
+    .reduce((s,t) => s + Math.abs(t.amount), 0);
+}
+
+document.getElementById('btn-add-category').onclick = () => {
+  const name = prompt('Category name (e.g. Groceries)'); if (!name) return;
+  const budget = parseFloat(prompt('Monthly budget for ' + name, '100')) || 0;
+  usersCol().collection('categories').add({ name, budget, keywords: [], order: categories.length });
+};
+
+function renderBudgets(){
+  const el = document.getElementById('budget-list');
+  if (!categories.length){ el.innerHTML = '<div class="empty">No categories yet — add your first one.</div>'; return; }
+  el.innerHTML = categories.map(c => {
+    const actual = actualForCategory(c.name);
+    const pct = c.budget > 0 ? Math.min(100, (actual / c.budget) * 100) : 0;
+    const over = actual > c.budget;
+    return `<div class="bar-row">
+      <div class="top">
+        <span class="name">${escapeHtml(c.name)}</span>
+        <span class="amt">£${actual.toFixed(0)} / £${c.budget}
+          <button class="secondary" onclick="editCategory('${c.id}')" style="border:none;background:none;color:var(--blue);cursor:pointer;text-decoration:underline;font-size:11px;margin-left:6px;">edit</button>
+        </span>
+      </div>
+      <div class="bar-track"><div class="bar-fill ${over?'over':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function editCategory(id){
+  const c = categories.find(x=>x.id===id); if (!c) return;
+  const action = prompt('Type "delete" to remove "' + c.name + '", or enter a new budget amount:', c.budget);
+  if (action === null) return;
+  if (action.trim().toLowerCase() === 'delete'){ usersCol().collection('categories').doc(id).delete(); return; }
+  const budget = parseFloat(action); if (!isNaN(budget)) usersCol().collection('categories').doc(id).update({budget});
+}
+
+/* ---------------------- DASHBOARD ---------------------- */
+function renderDashboard(){
+  const totalBudget = categories.reduce((s,c)=>s+(c.budget||0),0);
+  const totalActual = categories.reduce((s,c)=>s+actualForCategory(c.name),0);
+  const pct = totalBudget>0 ? Math.min(100,(totalActual/totalBudget)*100) : 0;
+  document.getElementById('dash-spent').textContent = '£' + totalActual.toFixed(0);
+  document.getElementById('dash-budget-total').textContent = 'of £' + totalBudget.toFixed(0) + ' budgeted';
+  document.getElementById('dash-ring-num').textContent = totalBudget>0 ? Math.round(pct)+'%' : '–';
+  const ring = document.getElementById('dash-ring');
+  const color = totalActual>totalBudget && totalBudget>0 ? '#c1440e' : '#2f5aa8';
+  ring.style.background = `conic-gradient(${color} ${pct*3.6}deg, #eef1f3 0deg)`;
+
+  const barsEl = document.getElementById('dash-bars');
+  barsEl.innerHTML = categories.length ? categories.map(c=>{
+    const actual = actualForCategory(c.name);
+    const pctc = c.budget>0 ? Math.min(100,(actual/c.budget)*100) : 0;
+    const over = actual > c.budget;
+    return `<div class="bar-row"><div class="top"><span class="name">${escapeHtml(c.name)}</span><span class="amt">£${actual.toFixed(0)}/£${c.budget}</span></div>
+      <div class="bar-track"><div class="bar-fill ${over?'over':''}" style="width:${pctc}%"></div></div></div>`;
+  }).join('') : '<div class="empty">Add categories in Budgets to see progress here.</div>';
+
+  const billsEl = document.getElementById('dash-bills');
+  const upcoming = billsWithDays().filter(b=>b.days<=30).slice(0,4);
+  billsEl.innerHTML = upcoming.length ? upcoming.map(b=>`
+    <div class="bill"><div><div class="name">${escapeHtml(b.name)}</div><div class="sub">£${b.amount}</div></div>
+    <div class="days ${b.days<=14?'soon':''}">${b.days}d</div></div>`).join('')
+    : '<div class="empty">No bills due in the next 30 days.</div>';
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ---------------------- UPLOAD / IMPORT ---------------------- */
+let rawRows = []; let rawHeaders = []; let mappedRows = [];
+
+document.getElementById('btn-browse').onclick = () => document.getElementById('file-input').click();
+document.getElementById('file-input').onchange = e => { if (e.target.files[0]) parseFile(e.target.files[0]); };
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) parseFile(e.dataTransfer.files[0]); });
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+}
+
+function parseFile(file){
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  document.getElementById('pdf-warning').style.display = 'none';
+  if (isPdf) {
+    parsePdfFile(file); // everything happens client-side — the PDF bytes never leave the browser
+  } else {
+    Papa.parse(file, {
+      header: true, skipEmptyLines: true,
+      complete: res => {
+        rawHeaders = res.meta.fields || [];
+        rawRows = res.data;
+        showMapping();
+      }
+    });
+  }
+  // in both cases the File object is only read into memory here and discarded — never uploaded
+}
+
+async function parsePdfFile(file){
+  const warnEl = document.getElementById('pdf-warning');
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let lines = [];
+    for (let p = 1; p <= pdf.numPages; p++){
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      lines = lines.concat(groupTextIntoLines(content.items));
+    }
+    const parsed = extractTransactionsFromLines(lines);
+    if (!parsed.length){
+      warnEl.style.display = 'block';
+      warnEl.innerHTML = 'Couldn\'t find transaction-shaped lines in that PDF — it may be a scanned image rather than real text, ' +
+        'or laid out in a way this simple parser doesn\'t recognise. Try the "paste transactions" option below instead, ' +
+        'or export a CSV from your bank\'s website if that\'s available.';
+      return;
+    }
+    mappedRows = parsed;
+    document.getElementById('upload-map').style.display = 'none';
+    showPreview();
+    if (parsed.some(r => r.uncertainSign)){
+      warnEl.style.display = 'block';
+      warnEl.innerHTML = 'PDF layout doesn\'t always make it clear whether an amount is money in or money out — ' +
+        'check the amounts below and use the <b>±</b> button to flip any that are the wrong sign before saving.';
+    }
+  } catch (err) {
+    warnEl.style.display = 'block';
+    warnEl.textContent = 'Could not read that PDF (' + err.message + '). Try the "paste transactions" option instead.';
+  }
+}
+
+// Groups pdf.js text items into visual lines by their y-position, left-to-right.
+function groupTextIntoLines(items){
+  const rows = {};
+  items.forEach(it => {
+    const y = Math.round(it.transform[5]);
+    if (!rows[y]) rows[y] = [];
+    rows[y].push(it);
+  });
+  return Object.keys(rows)
+    .sort((a,b) => b - a) // top of page first
+    .map(y => rows[y].sort((a,b) => a.transform[4]-b.transform[4]).map(it=>it.str).join(' ').replace(/\s+/g,' ').trim())
+    .filter(Boolean);
+}
+
+// Heuristic line parser: looks for a leading date, then the last one or two
+// money-shaped tokens on the line (transaction amount, optionally a running balance).
+function extractTransactionsFromLines(lines){
+  const dateStart = /^(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})\s+(.*)$/;
+  const moneyTok = /-?\(?£?\$?\d[\d,]*\.\d{2}\)?/g;
+  const out = [];
+  lines.forEach(line => {
+    const m = line.match(dateStart);
+    if (!m) return;
+    const date = normalizeDate(m[1]);
+    let rest = m[2];
+    const monies = rest.match(moneyTok);
+    if (!monies || !monies.length) return;
+    // last two tokens are typically [amount, balance] or just [amount]
+    const amountToken = monies.length >= 2 ? monies[monies.length-2] : monies[monies.length-1];
+    const amount = parseAmount(amountToken);
+    if (isNaN(amount)) return;
+    // description = everything before the first money token
+    const firstMoneyIdx = rest.indexOf(monies[0]);
+    const description = (firstMoneyIdx > 0 ? rest.slice(0, firstMoneyIdx) : rest).trim() || 'Transaction';
+    out.push({ date, description, amount, uncertainSign: !/^-|^\(/.test(amountToken.trim()) });
+  });
+  return out;
+}
+
+function showMapping(){
+  document.getElementById('upload-map').style.display = 'block';
+  ['map-date','map-desc','map-amount'].forEach(id=>{
+    const sel = document.getElementById(id);
+    sel.innerHTML = rawHeaders.map(h=>`<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`).join('');
+  });
+  // best-guess default selections
+  guessColumn('map-date', ['date','transaction date','posted']);
+  guessColumn('map-desc', ['description','details','narrative','merchant']);
+  guessColumn('map-amount', ['amount','value','debit','net']);
+}
+function guessColumn(selectId, hints){
+  const sel = document.getElementById(selectId);
+  const match = rawHeaders.find(h => hints.some(hint => h.toLowerCase().includes(hint)));
+  if (match) sel.value = match;
+}
+
+document.getElementById('btn-apply-map').onclick = () => {
+  const dCol = document.getElementById('map-date').value;
+  const descCol = document.getElementById('map-desc').value;
+  const aCol = document.getElementById('map-amount').value;
+  mappedRows = rawRows.map(r => ({
+    date: normalizeDate(r[dCol]),
+    description: (r[descCol]||'').trim(),
+    amount: parseAmount(r[aCol])
+  })).filter(r => r.description && !isNaN(r.amount));
+  showPreview();
+};
+
+document.getElementById('btn-parse-paste').onclick = () => {
+  const text = document.getElementById('paste-input').value.trim();
+  if (!text) return;
+  mappedRows = text.split('\n').map(line=>{
+    const parts = line.split(/,(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)/).map(p=>p.trim().replace(/^"|"$/g,''));
+    if (parts.length < 3) return null;
+    return { date: normalizeDate(parts[0]), description: parts[1], amount: parseAmount(parts[2]) };
+  }).filter(r => r && r.description && !isNaN(r.amount));
+  showPreview();
+};
+
+function normalizeDate(v){
+  if (!v) return '';
+  v = String(v).trim();
+  // dd/mm/yyyy -> yyyy-mm-dd
+  const m = v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m){ let [,d,mo,y]=m; if (y.length===2) y='20'+y; return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`; }
+  const d2 = new Date(v);
+  if (!isNaN(d2)) return d2.toISOString().slice(0,10);
+  return v;
+}
+function parseAmount(v){
+  if (v===undefined || v===null) return NaN;
+  let s = String(v).replace(/[£$,\s]/g,'');
+  const neg = /^\(.*\)$/.test(s); if (neg) s = s.replace(/[()]/g,'');
+  const n = parseFloat(s);
+  if (isNaN(n)) return NaN;
+  return neg ? -Math.abs(n) : n;
+}
+
+function guessCategory(desc){
+  const d = desc.toLowerCase();
+  for (const c of categories){
+    if ((c.keywords||[]).some(k => k && d.includes(k.toLowerCase()))) return c.name;
+  }
+  return categories[0] ? 'Uncategorised' : 'Uncategorised';
+}
+
+function showPreview(){
+  document.getElementById('preview-card').style.display = 'block';
+  document.getElementById('preview-count').textContent = mappedRows.length + ' transactions ready to review';
+  const catOptions = ['Uncategorised', ...categories.map(c=>c.name)];
+  document.getElementById('preview-rows').innerHTML = mappedRows.map((r,i)=>{
+    const guess = guessCategory(r.description);
+    return `<tr>
+      <td class="mono">${escapeHtml(r.date)}</td>
+      <td>${escapeHtml(r.description)}</td>
+      <td><input type="number" step="0.01" data-i="${i}" class="row-amt mono ${r.amount<0?'amt-neg':'amt-pos'}" value="${r.amount.toFixed(2)}" style="width:76px; padding:4px 6px;"></td>
+      <td><button data-i="${i}" class="row-flip btn secondary" style="padding:4px 7px; font-size:11px;" title="Flip +/-">±</button></td>
+      <td><select data-i="${i}" class="row-cat">${catOptions.map(o=>`<option ${o===guess?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('preview-card').scrollIntoView({behavior:'smooth'});
+}
+
+document.getElementById('preview-rows').addEventListener('click', e => {
+  if (!e.target.classList.contains('row-flip')) return;
+  const input = document.querySelector(`.row-amt[data-i="${e.target.dataset.i}"]`);
+  const v = parseFloat(input.value) || 0;
+  input.value = (-v).toFixed(2);
+  input.classList.toggle('amt-neg', -v < 0);
+  input.classList.toggle('amt-pos', -v >= 0);
+});
+
+document.getElementById('btn-cancel-import').onclick = () => {
+  mappedRows = []; rawRows = []; rawHeaders = [];
+  document.getElementById('preview-card').style.display = 'none';
+  document.getElementById('upload-map').style.display = 'none';
+  document.getElementById('pdf-warning').style.display = 'none';
+  document.getElementById('file-input').value = '';
+};
+
+document.getElementById('btn-confirm-import').onclick = async () => {
+  const selects = document.querySelectorAll('.row-cat');
+  const batch = db().batch();
+  const col = usersCol().collection('transactions');
+  selects.forEach(sel => {
+    const i = parseInt(sel.dataset.i);
+    const row = mappedRows[i];
+    const category = sel.value;
+    const amountInput = document.querySelector(`.row-amt[data-i="${i}"]`);
+    const amount = parseFloat(amountInput.value) || 0;
+    const ref = col.doc();
+    batch.set(ref, { date: row.date, description: row.description, amount, category, importedAt: new Date().toISOString() });
+    // learn this description as a keyword for next time, so future imports auto-categorise
+    if (category !== 'Uncategorised'){
+      const cat = categories.find(c=>c.name===category);
+      if (cat){
+        const kw = row.description.toLowerCase().split(' ')[0];
+        if (kw && !(cat.keywords||[]).includes(kw)){
+          usersCol().collection('categories').doc(cat.id).update({
+            keywords: firebase.firestore.FieldValue.arrayUnion(kw)
+          });
+        }
+      }
+    }
+  });
+  await batch.commit();
+  toast(mappedRows.length + ' transactions saved');
+  document.getElementById('btn-cancel-import').onclick();
+};
+
+function renderMapSelectsIfNeeded(){ /* categories may load after headers are shown — no-op, mapping doesn't need cats */ }
+
+/* ---------------------- FORECAST ---------------------- */
+let forecastYears = 5;
+document.querySelectorAll('.yr-btn').forEach(b=>{
+  b.onclick = () => {
+    document.querySelectorAll('.yr-btn').forEach(x=>x.classList.remove('btn')); 
+    document.querySelectorAll('.yr-btn').forEach(x=>x.classList.add('secondary'));
+    b.classList.remove('secondary'); b.classList.add('btn');
+    forecastYears = parseInt(b.dataset.yr);
+    renderForecast();
+  };
+});
+document.getElementById('forecast-income').onchange = saveForecastInputs;
+document.getElementById('forecast-start').onchange = saveForecastInputs;
+function saveForecastInputs(){
+  usersCol().collection('settings').doc('profile').set({
+    monthlyIncome: parseFloat(document.getElementById('forecast-income').value)||0,
+    startBalance: parseFloat(document.getElementById('forecast-start').value)||0
+  }, {merge:true});
+}
+
+function avgMonthlySpend(){
+  if (!transactions.length) return 0;
+  const byMonth = {};
+  transactions.filter(t=>t.amount<0).forEach(t=>{
+    const mk = (t.date||'').slice(0,7); if (!mk) return;
+    byMonth[mk] = (byMonth[mk]||0) + Math.abs(t.amount);
+  });
+  const vals = Object.values(byMonth);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+}
+
+function renderForecast(){
+  const income = parseFloat(document.getElementById('forecast-income').value)||0;
+  const start = parseFloat(document.getElementById('forecast-start').value)||0;
+  const spend = avgMonthlySpend();
+  const months = forecastYears*12;
+  const points = [];
+  for (let m=0; m<=months; m++) points.push(start + (income-spend)*m);
+
+  const canvas = document.getElementById('forecast-canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.clientWidth || 300, h = 180;
+  canvas.width = w*2; canvas.height = h*2; ctx.scale(2,2);
+  ctx.clearRect(0,0,w,h);
+  const min = Math.min(...points,0), max = Math.max(...points,1);
+  const range = (max-min)||1;
+  ctx.strokeStyle = '#2f5aa8'; ctx.lineWidth = 2; ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x = (i/months)*(w-20)+10;
+    const y = h-10-((p-min)/range)*(h-20);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // zero line
+  if (min<0){
+    const zy = h-10-((0-min)/range)*(h-20);
+    ctx.strokeStyle = '#e1e6ea'; ctx.setLineDash([4,4]); ctx.beginPath();
+    ctx.moveTo(10,zy); ctx.lineTo(w-10,zy); ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+window.addEventListener('resize', renderForecast);
+
+/* ---------------------- BILLS ---------------------- */
+function billsWithDays(){
+  const now = new Date();
+  return bills.map(b=>{
+    const due = new Date(b.dueDate);
+    const days = Math.round((due-now)/86400000);
+    return {...b, days};
+  }).sort((a,b)=>a.days-b.days);
+}
+document.getElementById('btn-add-bill').onclick = () => {
+  const name = prompt('Bill name (e.g. Home insurance)'); if (!name) return;
+  const amount = parseFloat(prompt('Amount (£)', '0')) || 0;
+  const dueDate = prompt('Next due date (YYYY-MM-DD)'); if (!dueDate) return;
+  const leadDays = parseInt(prompt('Remind how many days before?', '14')) || 14;
+  usersCol().collection('bills').add({ name, amount, dueDate, leadDays, recurrence:'yearly' });
+};
+function renderBills(){
+  const el = document.getElementById('bill-list');
+  const withDays = billsWithDays();
+  if (!withDays.length){ el.innerHTML = '<div class="empty">No bills added yet.</div>'; return; }
+  el.innerHTML = withDays.map(b=>`
+    <div class="bill">
+      <div>
+        <div class="name">${escapeHtml(b.name)}</div>
+        <div class="sub">£${b.amount} · due ${b.dueDate}</div>
+        <div class="actions">
+          <button class="btn secondary" onclick="findAlternatives('${escapeHtml(b.name)}')">Find alternatives</button>
+          <button class="btn secondary" onclick="deleteBill('${b.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="days ${b.days<=b.leadDays?'soon':''}">${b.days}d</div>
+    </div>`).join('');
+
+  // in-app notification for anything within its lead window, once per session
+  withDays.filter(b=>b.days<=b.leadDays && b.days>=0).forEach(b=>{
+    const key = 'notified-'+b.id;
+    if (!sessionStorageSafe(key)){
+      if (Notification && Notification.permission === 'granted'){
+        new Notification('Bill due soon', { body: b.name + ' — £' + b.amount + ' due in ' + b.days + ' days' });
+      }
+      markNotified(key);
+    }
+  });
+}
+// session-only flag (not persisted data — just avoids repeat popups within one tab session)
+const notifiedThisSession = {};
+function sessionStorageSafe(key){ return notifiedThisSession[key]; }
+function markNotified(key){ notifiedThisSession[key] = true; }
+
+function deleteBill(id){ if (confirm('Delete this bill?')) usersCol().collection('bills').doc(id).delete(); }
+function findAlternatives(name){ window.open('https://www.google.com/search?q=compare+' + encodeURIComponent(name) + '+providers+UK', '_blank'); }
+
+/* ---------------------- SETTINGS / NOTIFICATIONS ---------------------- */
+document.getElementById('btn-notif-permission').onclick = async () => {
+  const perm = await Notification.requestPermission();
+  document.getElementById('notif-status').textContent = perm;
+};
+</script>
+</body>
+</html>
