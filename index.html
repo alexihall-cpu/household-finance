@@ -375,7 +375,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v10 · 2026-08-08';
+const APP_VERSION = 'v11 · 2026-08-08';
 document.getElementById('app-version').textContent = APP_VERSION;
 
 /* =====================================================================
@@ -728,48 +728,88 @@ function groupTextIntoLines(items){
 }
 
 // Heuristic line parser used for both PDF-extracted lines and pasted text.
-// Finds a date anywhere in the line (numeric d/m/y OR "DD MONTHNAME" style,
-// e.g. "02 JULY") and the last money-shaped number as the amount — works
-// whether the line is comma-separated or plain space-separated bank text.
+// Handles two shapes:
+//  1) Bank statements with an explicit Type column (DD, DEB, FPO, FPI, SO, etc.)
+//     — e.g. Bank of Scotland/Lloyds-style layouts. When detected, ONLY rows
+//     typed DD (Direct Debit) or DEB (Debit Card) are kept — transfers (FPO/FPI),
+//     interest, and anything else are deliberately excluded, and the amount used
+//     is always treated as money OUT (DD/DEB are never money in).
+//  2) Plain statements with no Type column — falls back to finding a date
+//     anywhere in the line plus the last money-shaped number as the amount.
 const MONTHS = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+const TYPE_CODES = ['BGC','BP','CHG','CHQ','COR','CPT','DD','DEB','DEP','FEE','FPI','FPO','MPI','MPO','PAY','SO','TFR'];
+const INCLUDE_TYPES = ['DD','DEB']; // only direct debits and debit-card payments count as spend
+const typeRe = new RegExp('\\b(' + TYPE_CODES.join('|') + ')\\b');
+
 function findMonthNameDates(text){
-  const re = /(\d{1,2})\s+([A-Za-z]{3,9})\b/g;
+  const re = /(\d{1,2})\s+([A-Za-z]{3,9})\s*(\d{2,4})?/g;
   let m; const found = [];
   while ((m = re.exec(text))){
     const mon = m[2].slice(0,3).toUpperCase();
-    if (MONTHS[mon]) found.push({ full: m[0], day: m[1], month: MONTHS[mon] });
+    if (MONTHS[mon]) {
+      let year = m[3] ? parseInt(m[3]) : null;
+      if (year !== null && year < 100) year += 2000;
+      found.push({ full: m[0], day: m[1], month: MONTHS[mon], year });
+    }
   }
   return found;
 }
+function extractDateAndStrip(text){
+  let date = '', rest = text;
+  const numDate = rest.match(/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/);
+  if (numDate) {
+    date = normalizeDate(numDate[0]);
+    rest = rest.replace(numDate[0], '');
+  } else {
+    const monthDates = findMonthNameDates(rest);
+    if (monthDates.length) {
+      const first = monthDates[0];
+      const year = first.year || new Date().getFullYear();
+      date = `${year}-${String(first.month).padStart(2,'0')}-${String(first.day).padStart(2,'0')}`;
+      monthDates.forEach(fd => { rest = rest.replace(fd.full, ''); });
+    }
+  }
+  return { date, rest };
+}
+
 function extractTransactionsFromLines(lines){
   const moneyTok = /-?\(?£?\$?\d[\d,]*\.\d{2}\)?/g;
+  // If several lines carry a recognisable Type code, treat the whole document as a
+  // typed statement and require every kept row to have one — this is what filters
+  // out the interest line, summary lines, and the transaction-types legend.
+  const typedLineCount = lines.filter(l => typeRe.test(l)).length;
+  const isTypedStatement = typedLineCount >= 3;
   const out = [];
+
   lines.forEach(line => {
     const monies = line.match(moneyTok);
     if (!monies || !monies.length) return;
+    const typeMatch = line.match(typeRe);
+
+    if (isTypedStatement) {
+      if (!typeMatch) return; // no Type code on this line — not a transaction row
+      const type = typeMatch[1].toUpperCase();
+      if (!INCLUDE_TYPES.includes(type)) return; // drop transfers, interest, etc.
+
+      const amountToken = monies.length >= 2 ? monies[monies.length-2] : monies[monies.length-1];
+      let amount = parseAmount(amountToken);
+      if (isNaN(amount)) return;
+      amount = -Math.abs(amount); // DD/DEB are always money out
+
+      const { date, rest } = extractDateAndStrip(line.slice(0, typeMatch.index));
+      if (!date) return;
+      const description = rest.replace(/[,\s]+/g, ' ').trim() || 'Transaction';
+      out.push({ date, description, amount, uncertainSign: false });
+      return;
+    }
+
+    // Fallback: no Type column detected — generic heuristic
     const amountToken = monies[monies.length-1];
     const amount = parseAmount(amountToken);
     if (isNaN(amount)) return;
-
-    let description = line.slice(0, line.lastIndexOf(amountToken));
-    let date = '';
-    const numDate = description.match(/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/);
-    if (numDate){
-      date = normalizeDate(numDate[0]);
-      description = description.replace(numDate[0], '');
-    } else {
-      const monthDates = findMonthNameDates(description);
-      if (monthDates.length){
-        const first = monthDates[0];
-        const year = new Date().getFullYear();
-        date = `${year}-${String(first.month).padStart(2,'0')}-${String(first.day).padStart(2,'0')}`;
-        monthDates.forEach(fd => { description = description.replace(fd.full, ''); });
-      }
-    }
-    if (!date) return; // skip lines with no recognisable date — likely not a transaction row
-
-    description = description.replace(/^[\s,]*\d{2,6}[\s,]+/, ''); // strip leading card/reference numbers
-    description = description.replace(/[,\s]+/g, ' ').trim() || 'Transaction';
+    const { date, rest } = extractDateAndStrip(line.slice(0, line.lastIndexOf(amountToken)));
+    if (!date) return;
+    const description = rest.replace(/^[\s,]*\d{2,6}[\s,]+/, '').replace(/[,\s]+/g, ' ').trim() || 'Transaction';
     out.push({ date, description, amount, uncertainSign: !/^-|^\(/.test(amountToken.trim()) });
   });
   return out;
