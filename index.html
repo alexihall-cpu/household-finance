@@ -375,7 +375,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v11 · 2026-08-08';
+const APP_VERSION = 'v12 · 2026-08-08';
 document.getElementById('app-version').textContent = APP_VERSION;
 
 /* =====================================================================
@@ -769,6 +769,8 @@ function extractDateAndStrip(text){
       monthDates.forEach(fd => { rest = rest.replace(fd.full, ''); });
     }
   }
+  // strip stray punctuation/table-separator artefacts left at either edge (e.g. leading/trailing ".")
+  rest = rest.replace(/^[^A-Za-z0-9]+/, '').replace(/[^A-Za-z0-9]+$/, '');
   return { date, rest };
 }
 
@@ -794,7 +796,7 @@ function extractTransactionsFromLines(lines){
       const amountToken = monies.length >= 2 ? monies[monies.length-2] : monies[monies.length-1];
       let amount = parseAmount(amountToken);
       if (isNaN(amount)) return;
-      amount = -Math.abs(amount); // DD/DEB are always money out
+      amount = Math.abs(amount); // shown as a positive spend amount by default
 
       const { date, rest } = extractDateAndStrip(line.slice(0, typeMatch.index));
       if (!date) return;
@@ -880,9 +882,9 @@ function parseAmount(v){
 function guessCategory(desc){
   const d = desc.toLowerCase();
   for (const c of categories){
-    if ((c.keywords||[]).some(k => k && d.includes(k.toLowerCase()))) return c.name;
+    if ((c.keywords||[]).some(k => k && k.length >= 3 && /^[a-z0-9]+$/i.test(k) && d.includes(k.toLowerCase()))) return c.name;
   }
-  return categories[0] ? 'Uncategorised' : 'Uncategorised';
+  return 'Uncategorised';
 }
 
 function showPreview(){
@@ -949,7 +951,7 @@ document.getElementById('btn-confirm-import').onclick = async () => {
       const cat = categories.find(c=>c.name===category);
       if (cat){
         const kw = row.description.toLowerCase().split(' ')[0];
-        if (kw && !(cat.keywords||[]).includes(kw)){
+        if (kw && kw.length >= 3 && /^[a-z0-9]+$/.test(kw) && !(cat.keywords||[]).includes(kw)){
           usersCol().collection('categories').doc(cat.id).update({
             keywords: firebase.firestore.FieldValue.arrayUnion(kw)
           });
