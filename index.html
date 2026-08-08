@@ -172,7 +172,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <h1>Household Finance</h1>
+    <h1>Household Finance <span style="font-weight:400; font-size:11px; color:var(--ink-soft);" id="app-version"></span></h1>
     <div class="row">
       <span class="user" id="user-email"></span>
       <button class="signout" id="btn-signout">Sign out</button>
@@ -373,6 +373,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* Bump this string every time the file is updated — shown in the header
+   so you can confirm your browser is actually running the latest deploy. */
+const APP_VERSION = 'v10 · 2026-08-08';
+document.getElementById('app-version').textContent = APP_VERSION;
+
 /* =====================================================================
    FIREBASE CONFIG — paste the values from your Firebase project here
    (Project settings → General → Your apps → SDK setup and config)
@@ -538,9 +543,10 @@ document.addEventListener('click', e => {
 updateMonthLabels();
 
 /* ---------------------- BUDGETS ---------------------- */
+function normCat(s){ return (s||'').trim().toLowerCase(); }
 function actualForCategory(catName){
   return transactions
-    .filter(t => t.category === catName && t.date && t.date.slice(0,7) === selectedMonth && t.amount < 0)
+    .filter(t => normCat(t.category) === normCat(catName) && t.date && t.date.slice(0,7) === selectedMonth)
     .reduce((s,t) => s + Math.abs(t.amount), 0);
 }
 
@@ -941,7 +947,7 @@ function saveForecastInputs(){
 function avgMonthlySpend(){
   if (!transactions.length) return 0;
   const byMonth = {};
-  transactions.filter(t=>t.amount<0).forEach(t=>{
+  transactions.filter(t=>t.category && t.category !== 'Uncategorised').forEach(t=>{
     const mk = (t.date||'').slice(0,7); if (!mk) return;
     byMonth[mk] = (byMonth[mk]||0) + Math.abs(t.amount);
   });
