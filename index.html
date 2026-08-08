@@ -397,6 +397,19 @@ if (firebaseConfig.apiKey === "YOUR_API_KEY") {
   firebase.initializeApp(firebaseConfig);
 }
 
+/* =====================================================================
+   ALLOWLIST — only these emails may create accounts / sign in.
+   This is a UX convenience only; the real protection is the Firestore
+   rule below, which checks the same list server-side.
+   ===================================================================== */
+const ALLOWED_EMAILS = [
+  'alexi_hall@yahoo.com',
+  'omobolanleganny@yahoo.com'
+];
+function isAllowedEmail(email){
+  return !!email && ALLOWED_EMAILS.includes(email.toLowerCase());
+}
+
 const auth = () => firebase.auth();
 const db = () => firebase.firestore();
 let uid = null;
@@ -412,22 +425,33 @@ let settingsDoc = { monthlyIncome: null, startBalance: null };
 document.getElementById('btn-signin').onclick = () => {
   const email = document.getElementById('auth-email').value.trim();
   const pw = document.getElementById('auth-password').value;
+  if (!isAllowedEmail(email)) { showAuthError({message:'This app is invite-only — that email isn\'t on the list.'}); return; }
   auth().signInWithEmailAndPassword(email, pw).catch(showAuthError);
 };
 document.getElementById('btn-signup').onclick = () => {
   const email = document.getElementById('auth-email').value.trim();
   const pw = document.getElementById('auth-password').value;
+  if (!isAllowedEmail(email)) { showAuthError({message:'This app is invite-only — that email isn\'t on the list.'}); return; }
   auth().createUserWithEmailAndPassword(email, pw).catch(showAuthError);
 };
 document.getElementById('btn-signout').onclick = () => auth().signOut();
 document.getElementById('btn-google').onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth().signInWithPopup(provider).catch(showAuthError);
+  auth().signInWithPopup(provider).then(result => {
+    if (!isAllowedEmail(result.user.email)) {
+      auth().signOut();
+      showAuthError({message:'This app is invite-only — ' + result.user.email + ' isn\'t on the list.'});
+    }
+  }).catch(showAuthError);
 };
 function showAuthError(err){ document.getElementById('auth-error').textContent = err.message; }
 
 if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
   auth().onAuthStateChanged(user => {
+    if (user && !isAllowedEmail(user.email)) {
+      auth().signOut();
+      return;
+    }
     if (user) {
       uid = user.uid;
       document.getElementById('auth-screen').style.display = 'none';
