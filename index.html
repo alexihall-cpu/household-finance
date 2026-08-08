@@ -13,7 +13,7 @@
 <!-- PapaParse — robust CSV parsing (handles quoted fields, different delimiters) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <!-- pdf.js — extracts text from PDF statements entirely in the browser, nothing uploaded -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
   :root{
@@ -542,7 +542,7 @@ dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) parseFile(e.dataTransfer.files[0]); });
 
 if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
 function parseFile(file){
@@ -610,26 +610,49 @@ function groupTextIntoLines(items){
     .filter(Boolean);
 }
 
-// Heuristic line parser: looks for a leading date, then the last one or two
-// money-shaped tokens on the line (transaction amount, optionally a running balance).
+// Heuristic line parser used for both PDF-extracted lines and pasted text.
+// Finds a date anywhere in the line (numeric d/m/y OR "DD MONTHNAME" style,
+// e.g. "02 JULY") and the last money-shaped number as the amount — works
+// whether the line is comma-separated or plain space-separated bank text.
+const MONTHS = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+function findMonthNameDates(text){
+  const re = /(\d{1,2})\s+([A-Za-z]{3,9})\b/g;
+  let m; const found = [];
+  while ((m = re.exec(text))){
+    const mon = m[2].slice(0,3).toUpperCase();
+    if (MONTHS[mon]) found.push({ full: m[0], day: m[1], month: MONTHS[mon] });
+  }
+  return found;
+}
 function extractTransactionsFromLines(lines){
-  const dateStart = /^(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})\s+(.*)$/;
   const moneyTok = /-?\(?£?\$?\d[\d,]*\.\d{2}\)?/g;
   const out = [];
   lines.forEach(line => {
-    const m = line.match(dateStart);
-    if (!m) return;
-    const date = normalizeDate(m[1]);
-    let rest = m[2];
-    const monies = rest.match(moneyTok);
+    const monies = line.match(moneyTok);
     if (!monies || !monies.length) return;
-    // last two tokens are typically [amount, balance] or just [amount]
-    const amountToken = monies.length >= 2 ? monies[monies.length-2] : monies[monies.length-1];
+    const amountToken = monies[monies.length-1];
     const amount = parseAmount(amountToken);
     if (isNaN(amount)) return;
-    // description = everything before the first money token
-    const firstMoneyIdx = rest.indexOf(monies[0]);
-    const description = (firstMoneyIdx > 0 ? rest.slice(0, firstMoneyIdx) : rest).trim() || 'Transaction';
+
+    let description = line.slice(0, line.lastIndexOf(amountToken));
+    let date = '';
+    const numDate = description.match(/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/);
+    if (numDate){
+      date = normalizeDate(numDate[0]);
+      description = description.replace(numDate[0], '');
+    } else {
+      const monthDates = findMonthNameDates(description);
+      if (monthDates.length){
+        const first = monthDates[0];
+        const year = new Date().getFullYear();
+        date = `${year}-${String(first.month).padStart(2,'0')}-${String(first.day).padStart(2,'0')}`;
+        monthDates.forEach(fd => { description = description.replace(fd.full, ''); });
+      }
+    }
+    if (!date) return; // skip lines with no recognisable date — likely not a transaction row
+
+    description = description.replace(/^[\s,]*\d{2,6}[\s,]+/, ''); // strip leading card/reference numbers
+    description = description.replace(/[,\s]+/g, ' ').trim() || 'Transaction';
     out.push({ date, description, amount, uncertainSign: !/^-|^\(/.test(amountToken.trim()) });
   });
   return out;
@@ -667,11 +690,14 @@ document.getElementById('btn-apply-map').onclick = () => {
 document.getElementById('btn-parse-paste').onclick = () => {
   const text = document.getElementById('paste-input').value.trim();
   if (!text) return;
-  mappedRows = text.split('\n').map(line=>{
-    const parts = line.split(/,(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)/).map(p=>p.trim().replace(/^"|"$/g,''));
-    if (parts.length < 3) return null;
-    return { date: normalizeDate(parts[0]), description: parts[1], amount: parseAmount(parts[2]) };
-  }).filter(r => r && r.description && !isNaN(r.amount));
+  mappedRows = extractTransactionsFromLines(text.split('\n').filter(l => l.trim()));
+  document.getElementById('pdf-warning').style.display = 'none';
+  if (!mappedRows.length){
+    const warnEl = document.getElementById('pdf-warning');
+    warnEl.style.display = 'block';
+    warnEl.textContent = 'Couldn\'t find a date and amount on any of those lines — check each transaction is on its own line with a date and amount somewhere in it.';
+    return;
+  }
   showPreview();
 };
 
@@ -709,7 +735,7 @@ function showPreview(){
   document.getElementById('preview-rows').innerHTML = mappedRows.map((r,i)=>{
     const guess = guessCategory(r.description);
     return `<tr>
-      <td class="mono">${escapeHtml(r.date)}</td>
+      <td><input type="date" data-i="${i}" class="row-date mono" value="${escapeHtml(r.date)}" style="width:128px; padding:4px 6px;"></td>
       <td>${escapeHtml(r.description)}</td>
       <td><input type="number" step="0.01" data-i="${i}" class="row-amt mono ${r.amount<0?'amt-neg':'amt-pos'}" value="${r.amount.toFixed(2)}" style="width:76px; padding:4px 6px;"></td>
       <td><button data-i="${i}" class="row-flip btn secondary" style="padding:4px 7px; font-size:11px;" title="Flip +/-">±</button></td>
@@ -745,9 +771,11 @@ document.getElementById('btn-confirm-import').onclick = async () => {
     const row = mappedRows[i];
     const category = sel.value;
     const amountInput = document.querySelector(`.row-amt[data-i="${i}"]`);
+    const dateInput = document.querySelector(`.row-date[data-i="${i}"]`);
     const amount = parseFloat(amountInput.value) || 0;
+    const date = dateInput.value || row.date;
     const ref = col.doc();
-    batch.set(ref, { date: row.date, description: row.description, amount, category, importedAt: new Date().toISOString() });
+    batch.set(ref, { date, description: row.description, amount, category, importedAt: new Date().toISOString() });
     // learn this description as a keyword for next time, so future imports auto-categorise
     if (category !== 'Uncategorised'){
       const cat = categories.find(c=>c.name===category);
