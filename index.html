@@ -117,6 +117,11 @@
   td select{padding:4px 6px; font-size:11px;}
   .amt-neg{color:var(--red);}
   .amt-pos{color:var(--green);}
+  tr.dup-row{background:var(--red-bg);}
+  .dup-tag{
+    display:inline-block; background:var(--red); color:#fff; font-size:9px; font-weight:700;
+    padding:2px 5px; border-radius:3px; letter-spacing:.03em; margin-right:4px; vertical-align:middle;
+  }
 
   /* bills */
   .bill{
@@ -244,6 +249,7 @@
           <button class="btn secondary month-next" style="padding:6px 10px;">›</button>
         </div>
         <h2 style="margin-bottom:12px;">Transactions</h2>
+        <div id="txn-dup-banner" style="display:none; background:var(--red-bg); color:var(--red); border:1px solid var(--red); border-radius:6px; padding:8px 12px; font-size:12px; margin-bottom:10px;"></div>
         <div style="overflow-x:auto;">
           <table>
             <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Category</th><th></th></tr></thead>
@@ -297,6 +303,7 @@
 
       <div class="card" id="preview-card" style="display:none;">
         <h2>Preview — check categories before saving</h2>
+        <div id="preview-dup-banner" style="display:none; background:var(--red-bg); color:var(--red); border:1px solid var(--red); border-radius:6px; padding:8px 12px; font-size:12px; margin-bottom:10px;"></div>
         <div style="overflow-x:auto;">
           <table>
             <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th></th><th>Category</th><th></th></tr></thead>
@@ -397,7 +404,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v14 · 2026-08-08';
+const APP_VERSION = 'v15 · 2026-08-08';
 document.getElementById('app-version').textContent = APP_VERSION;
 
 /* =====================================================================
@@ -663,22 +670,80 @@ function renderDashboard(){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+/* ---------------------- DUPLICATE DETECTION ---------------------- */
+// Two transactions are a "suspected duplicate" if they share the same date,
+// the same amount (to the penny), and their descriptions are a close match
+// (either one contains the other, once case/punctuation is stripped).
+function normDesc(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+function looksLikeDuplicate(a, b){
+  if (a.date !== b.date) return false;
+  if (Math.abs(a.amount) !== Math.abs(b.amount)) return false;
+  const da = normDesc(a.description), db = normDesc(b.description);
+  if (!da || !db) return false;
+  return da === db || da.includes(db) || db.includes(da);
+}
+// Finds saved-transaction ids that look like duplicates of each other, restricted to `pool`.
+// Returns a Set of ids that are involved in at least one duplicate pair.
+function findDuplicateIdsIn(pool){
+  const flagged = new Set();
+  const active = pool.filter(t => !t.dupIgnored);
+  for (let i=0; i<active.length; i++){
+    for (let j=i+1; j<active.length; j++){
+      if (looksLikeDuplicate(active[i], active[j])){
+        flagged.add(active[i].id); flagged.add(active[j].id);
+      }
+    }
+  }
+  return flagged;
+}
+// For the upload preview: flags NEW rows that match something already saved in Firestore
+// (any month, not just the one being viewed) — catches re-uploading an overlapping statement.
+function findRowsMatchingExisting(newRows){
+  const matches = new Array(newRows.length).fill(false);
+  newRows.forEach((row, i) => {
+    if (transactions.some(existing => looksLikeDuplicate(row, existing))) matches[i] = true;
+  });
+  return matches;
+}
+
+
 /* ---------------------- TRANSACTIONS (view / edit saved data) ---------------------- */
 function renderTransactions(){
   const rows = transactions.filter(t => t.date && t.date.slice(0,7) === selectedMonth);
   const el = document.getElementById('txn-rows');
   const emptyEl = document.getElementById('txn-empty');
-  if (!rows.length){ el.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+  const dupBanner = document.getElementById('txn-dup-banner');
+  if (!rows.length){
+    el.innerHTML = ''; emptyEl.style.display = 'block';
+    if (dupBanner) dupBanner.style.display = 'none';
+    return;
+  }
   emptyEl.style.display = 'none';
   const catOptions = ['Uncategorised', ...categories.map(c=>c.name)];
-  el.innerHTML = rows.map(t => `
-    <tr data-id="${t.id}">
+
+  const dupIds = findDuplicateIdsIn(rows);
+  const dupRows = rows.filter(t => dupIds.has(t.id));
+  const normalRows = rows.filter(t => !dupIds.has(t.id));
+
+  if (dupBanner){
+    dupBanner.style.display = dupRows.length ? 'block' : 'none';
+    dupBanner.textContent = dupRows.length
+      ? `⚠️ ${dupRows.length} transaction${dupRows.length>1?'s':''} look${dupRows.length>1?'':'s'} like possible duplicates — flagged below in ${monthLabel(selectedMonth)}.`
+      : '';
+  }
+
+  function rowHtml(t, isDup){
+    return `
+    <tr data-id="${t.id}" class="${isDup?'dup-row':''}">
       <td><input type="date" class="txn-date mono" data-id="${t.id}" value="${escapeHtml(t.date)}" style="width:128px; padding:4px 6px;"></td>
-      <td><input type="text" class="txn-desc" data-id="${t.id}" value="${escapeHtml(t.description)}" style="min-width:140px; padding:4px 6px;"></td>
+      <td>${isDup?'<span class="dup-tag" title="Same date, amount and similar description as another transaction">DUPLICATE?</span> ':''}<input type="text" class="txn-desc" data-id="${t.id}" value="${escapeHtml(t.description)}" style="min-width:140px; padding:4px 6px;"></td>
       <td><input type="number" step="0.01" class="txn-amt mono ${t.amount<0?'amt-neg':'amt-pos'}" data-id="${t.id}" value="${t.amount.toFixed(2)}" style="width:76px; padding:4px 6px;"></td>
       <td><select class="txn-cat" data-id="${t.id}">${catOptions.map(o=>`<option ${o===t.category?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></td>
-      <td><button class="txn-delete btn secondary" data-id="${t.id}" style="padding:4px 7px; font-size:11px; color:var(--red); border-color:var(--red);" title="Delete">✕</button></td>
-    </tr>`).join('');
+      <td>${isDup?`<button class="txn-dismiss-dup btn secondary" data-id="${t.id}" style="padding:4px 7px; font-size:11px; margin-right:4px;" title="Not a duplicate — stop flagging">Not a dupe</button>`:''}<button class="txn-delete btn secondary" data-id="${t.id}" style="padding:4px 7px; font-size:11px; color:var(--red); border-color:var(--red);" title="Delete">✕</button></td>
+    </tr>`;
+  }
+
+  el.innerHTML = dupRows.map(t=>rowHtml(t,true)).join('') + normalRows.map(t=>rowHtml(t,false)).join('');
 }
 
 document.getElementById('txn-rows').addEventListener('change', e => {
@@ -695,8 +760,12 @@ document.getElementById('txn-rows').addEventListener('change', e => {
   if (e.target.classList.contains('txn-cat')) ref.update({ category: e.target.value });
 });
 document.getElementById('txn-rows').addEventListener('click', e => {
-  if (!e.target.classList.contains('txn-delete')) return;
-  if (confirm('Delete this transaction?')) usersCol().collection('transactions').doc(e.target.dataset.id).delete();
+  if (e.target.classList.contains('txn-delete')){
+    if (confirm('Delete this transaction?')) usersCol().collection('transactions').doc(e.target.dataset.id).delete();
+  }
+  if (e.target.classList.contains('txn-dismiss-dup')){
+    usersCol().collection('transactions').doc(e.target.dataset.id).update({ dupIgnored: true });
+  }
 });
 
 /* ---------------------- UPLOAD / IMPORT ---------------------- */
@@ -942,11 +1011,22 @@ function showPreview(){
   document.getElementById('preview-card').style.display = 'block';
   document.getElementById('preview-count').textContent = mappedRows.length + ' transactions ready to review';
   const catOptions = ['Uncategorised', ...categories.map(c=>c.name)];
+  const dupFlags = findRowsMatchingExisting(mappedRows);
+  const dupCount = dupFlags.filter(Boolean).length;
+  const dupBanner = document.getElementById('preview-dup-banner');
+  if (dupBanner){
+    dupBanner.style.display = dupCount ? 'block' : 'none';
+    dupBanner.textContent = dupCount
+      ? `⚠️ ${dupCount} of these ${dupCount>1?'look':'looks'} like transaction${dupCount>1?'s':''} already saved (same date, amount, and similar description) — flagged below. Remove them with the ✕ if they're already in the app.`
+      : '';
+  }
+
   document.getElementById('preview-rows').innerHTML = mappedRows.map((r,i)=>{
     const guess = guessCategory(r.description);
-    return `<tr data-row="${i}">
+    const isDup = dupFlags[i];
+    return `<tr data-row="${i}" class="${isDup?'dup-row':''}">
       <td><input type="date" data-i="${i}" class="row-date mono" value="${escapeHtml(r.date)}" style="width:128px; padding:4px 6px;"></td>
-      <td>${escapeHtml(r.description)}</td>
+      <td>${isDup?'<span class="dup-tag" title="Matches a transaction already saved">ALREADY SAVED?</span> ':''}${escapeHtml(r.description)}</td>
       <td><input type="number" step="0.01" data-i="${i}" class="row-amt mono ${r.amount<0?'amt-neg':'amt-pos'}" value="${r.amount.toFixed(2)}" style="width:76px; padding:4px 6px;"></td>
       <td><button data-i="${i}" class="row-flip btn secondary" style="padding:4px 7px; font-size:11px;" title="Flip +/-">±</button></td>
       <td><select data-i="${i}" class="row-cat">${catOptions.map(o=>`<option ${o===guess?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></td>
