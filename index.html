@@ -242,6 +242,13 @@
 
     <!-- TRANSACTIONS -->
     <section class="view" id="view-transactions">
+      <div class="card" style="margin-bottom:14px;">
+        <h2 style="margin-bottom:10px;">Search transactions</h2>
+        <input type="text" id="txn-search" placeholder="Search by description or amount (e.g. tesco, or 24.99) — searches all months" style="width:100%; padding:8px 10px;">
+        <div class="empty" id="txn-search-empty" style="display:none; margin-top:10px;">No matching transactions.</div>
+        <div id="txn-search-results" style="overflow-x:auto; margin-top:10px;"></div>
+      </div>
+
       <div class="card">
         <div class="row month-nav" style="margin-bottom:12px; align-items:center;">
           <button class="btn secondary month-prev" style="padding:6px 10px;">‹</button>
@@ -404,7 +411,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v15 · 2026-08-08';
+const APP_VERSION = 'v16 · 2026-08-11';
 document.getElementById('app-version').textContent = APP_VERSION;
 
 /* =====================================================================
@@ -716,6 +723,7 @@ function renderTransactions(){
   if (!rows.length){
     el.innerHTML = ''; emptyEl.style.display = 'block';
     if (dupBanner) dupBanner.style.display = 'none';
+    renderTxnSearch();
     return;
   }
   emptyEl.style.display = 'none';
@@ -744,7 +752,49 @@ function renderTransactions(){
   }
 
   el.innerHTML = dupRows.map(t=>rowHtml(t,true)).join('') + normalRows.map(t=>rowHtml(t,false)).join('');
+  renderTxnSearch();
 }
+
+function renderTxnSearch(){
+  const q = (document.getElementById('txn-search').value || '').trim().toLowerCase();
+  const resultsEl = document.getElementById('txn-search-results');
+  const emptyEl = document.getElementById('txn-search-empty');
+  if (!q){ resultsEl.innerHTML = ''; emptyEl.style.display = 'none'; return; }
+
+  const matches = transactions.filter(t => {
+    const desc = (t.description || '').toLowerCase();
+    const amtStr = Math.abs(t.amount).toFixed(2);
+    return desc.includes(q) || amtStr.includes(q);
+  }).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+  if (!matches.length){
+    resultsEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  resultsEl.innerHTML = `
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Category</th><th></th></tr></thead>
+      <tbody>
+        ${matches.map(t => `
+          <tr>
+            <td class="mono">${escapeHtml(t.date)}</td>
+            <td>${escapeHtml(t.description)}</td>
+            <td class="mono ${t.amount<0?'amt-neg':'amt-pos'}">${t.amount.toFixed(2)}</td>
+            <td>${escapeHtml(t.category || 'Uncategorised')}</td>
+            <td><button class="txn-search-jump btn secondary" data-month="${escapeHtml((t.date||'').slice(0,7))}" style="padding:4px 7px; font-size:11px;">Go to month</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+document.getElementById('txn-search').addEventListener('input', renderTxnSearch);
+document.getElementById('txn-search-results').addEventListener('click', e => {
+  if (e.target.classList.contains('txn-search-jump')){
+    const mk = e.target.dataset.month;
+    if (mk){ selectedMonth = mk; renderTransactions(); updateMonthLabels(); }
+  }
+});
 
 document.getElementById('txn-rows').addEventListener('change', e => {
   const id = e.target.dataset.id; if (!id) return;
