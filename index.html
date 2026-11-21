@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
-<title>Kodu Finance</title>
+<title>Household Finance</title>
 
 <!-- Firebase (compat SDK — simplest syntax to configure) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -158,7 +158,7 @@
 <!-- ================= AUTH SCREEN ================= -->
 <div id="auth-screen">
   <div class="box">
-    <h1>Kodu Finance</h1>
+    <h1>Household Finance</h1>
     <p class="muted">Private — your data only. Sign in or create an account.</p>
     <div class="field">
       <label>Email</label>
@@ -182,7 +182,7 @@
 <!-- ================= APP ================= -->
 <div id="app">
   <header>
-    <h1>Kodu Finance <span style="font-weight:400; font-size:11px; color:var(--ink-soft);" id="app-version"></span></h1>
+    <h1>Household Finance <span style="font-weight:400; font-size:11px; color:var(--ink-soft);" id="app-version"></span></h1>
     <div class="row">
       <span class="user" id="user-email"></span>
       <button class="signout" id="btn-signout">Sign out</button>
@@ -197,7 +197,6 @@
     <button data-view="forecast">Forecast</button>
     <button data-view="bills">Bills</button>
     <button data-view="planned">Planned</button>
-    <button data-view="business">Business income</button>
     <button data-view="settings">Settings</button>
   </nav>
 
@@ -346,10 +345,6 @@
           <span><span style="display:inline-block;width:14px;height:2px;background:#141c26;vertical-align:middle;"></span> Actual</span>
           <span><span style="display:inline-block;width:14px;height:2px;background:#2f5aa8;vertical-align:middle;"></span> Forecast</span>
         </div>
-        <label class="row" style="gap:8px; margin-top:12px; text-transform:none; font-size:13px; color:var(--ink); font-weight:500; letter-spacing:0;">
-          <input type="checkbox" id="forecast-include-business" style="width:auto;"> Include my business take-home (from the Business income tab)
-        </label>
-        <p class="muted" id="forecast-business-note" style="margin-top:4px;"></p>
         <p class="muted" id="forecast-planned-note" style="margin-top:4px; color:var(--blue);"></p>
         <div class="row wrap" style="margin-top:14px; gap:14px;">
           <div style="flex:1; min-width:140px;">
@@ -396,30 +391,6 @@
     </section>
 
     <!-- SETTINGS -->
-    <!-- BUSINESS INCOME -->
-    <section class="view" id="view-business">
-      <div class="card">
-        <h2>Business income</h2>
-        <p class="muted" style="margin-bottom:10px;">
-          Alexi's freelance income forecast, from the Finance Manager. Kept separate from household
-          budgets and transactions. Tap Import and choose <b>forecast.json</b> from
-          Documents &gt; PERSONAL &gt; Finance &gt; For Kodu Finance.
-        </p>
-        <div class="row wrap">
-          <button class="btn" id="btn-business-import">Import forecast.json</button>
-          <input type="file" id="business-file" accept=".json,application/json" style="display:none;">
-          <span class="muted" id="business-updated"></span>
-        </div>
-        <p id="business-error" style="color:var(--red); font-size:12px; margin-top:8px;"></p>
-      </div>
-      <div class="card" id="business-table-card" style="display:none;">
-        <p class="muted" id="business-basis" style="margin-bottom:10px;"></p>
-        <div style="overflow-x:auto;">
-          <table id="business-table" style="width:100%; border-collapse:collapse; font-size:13px;"></table>
-        </div>
-      </div>
-    </section>
-
     <section class="view" id="view-settings">
       <div class="card">
         <h2>Account</h2>
@@ -445,7 +416,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v21 · 2026-11-21';
+const APP_VERSION = 'v20 · 2026-08-11';
 document.getElementById('app-version').textContent = APP_VERSION;
 
 /* =====================================================================
@@ -569,14 +540,6 @@ function attachListeners(){
     plannedExpenses = snap.docs.map(d => ({id:d.id, ...d.data()}));
     renderPlanned(); renderForecast();
   }));
-
-  unsubscribers.push(base.collection('settings').doc('businessForecast').onSnapshot(snap => {
-    if (!snap.exists) return;
-    try {
-      const d = JSON.parse(snap.data().data);
-      if (!validateBusinessForecast(d)){ businessForecast = d; try { localStorage.setItem(BF_KEY, JSON.stringify(d)); } catch(e){} renderBusiness(); renderForecast(); }
-    } catch(e){}
-  }, () => {}));
 
   unsubscribers.push(base.collection('settings').doc('profile').onSnapshot(snap => {
     settingsDoc = snap.exists ? snap.data() : {};
@@ -1253,8 +1216,6 @@ function renderForecast(){
   const income = parseFloat(document.getElementById('forecast-income').value)||0;
   const start = parseFloat(document.getElementById('forecast-start').value)||0; // treated as balance as of today (offset 0)
   const spend = avgMonthlySpend();
-  const withBusiness = includeBusiness() && !!businessForecast;
-  document.getElementById('forecast-include-business').checked = includeBusiness();
   const months = forecastYears*12;
   const pastMonths = 6; // fixed window of recent history shown alongside the forecast
 
@@ -1278,7 +1239,7 @@ function renderForecast(){
     forecastBalances[o] = forecastBalances[o+1] - (income - spend);
   }
   for (let o=1; o<=months; o++){
-    forecastBalances[o] = forecastBalances[o-1] + (income - spend) - plannedExpenseForMonth(monthKeyAtOffset(o)) + (withBusiness ? businessTakeHome(monthKeyAtOffset(o)) : 0);
+    forecastBalances[o] = forecastBalances[o-1] + (income - spend) - plannedExpenseForMonth(monthKeyAtOffset(o));
   }
 
   const offsets = []; for (let o=-pastMonths; o<=months; o++) offsets.push(o);
@@ -1363,15 +1324,6 @@ function renderForecast(){
   }
 
   const totalPlanned = Math.round(Array.from({length:months},(_,i)=>plannedExpenseForMonth(monthKeyAtOffset(i+1))).reduce((a,b)=>a+b,0));
-  const bNote = document.getElementById('forecast-business-note');
-  if (bNote){
-    if (includeBusiness() && !businessForecast) bNote.textContent = 'Nothing imported yet. Import a forecast on the Business income tab first.';
-    else if (withBusiness){
-      const total = businessForecast.months.reduce((a,m)=>a+(m.take_home||0),0);
-      const first = businessForecast.months[0].month, last = businessForecast.months[businessForecast.months.length-1].month;
-      bNote.textContent = 'Includes ' + gbp(total) + ' business take-home (' + first + ' to ' + last + '), tax set aside' + (businessForecast.tax_rate_is_provisional ? ' at a provisional rate' : '') + '. Months before today are not added.';
-    } else bNote.textContent = '';
-  }
   const noteEl = document.getElementById('forecast-planned-note');
   if (noteEl) noteEl.textContent = totalPlanned > 0
     ? `Includes £${totalPlanned} of planned expenses over this period.`
@@ -1379,83 +1331,6 @@ function renderForecast(){
 }
 
 window.addEventListener('resize', renderForecast);
-
-/* ---------------------- BUSINESS INCOME ---------------------- */
-// Imported from forecast.json (Finance Manager). Stored per user at users/{uid}/settings/businessForecast,
-// with a localStorage copy so it still shows if Firestore is unreachable. Never mixed into household data.
-let businessForecast = null;
-const BF_KEY = 'kodu-business-forecast';
-const BF_INCLUDE_KEY = 'kodu-include-business';
-try { businessForecast = JSON.parse(localStorage.getItem(BF_KEY) || 'null'); } catch(e){ businessForecast = null; }
-
-function validateBusinessForecast(d){
-  if (!d || typeof d !== 'object') return 'That file isn\'t a forecast.';
-  if (d.version !== 1) return 'This forecast is a newer format than this app understands (version ' + d.version + ').';
-  if (!Array.isArray(d.months) || !d.months.length) return 'The forecast has no months in it.';
-  for (const m of d.months){
-    if (!/^\d{4}-\d{2}$/.test(m.month||'')) return 'A month is missing its date (expected like 2026-11).';
-    for (const k of ['expected_income','tax_to_set_aside','take_home'])
-      if (typeof m[k] !== 'number' || !isFinite(m[k])) return m.month + ': ' + k + ' should be a number.';
-  }
-  return null;
-}
-function gbp(n){ return '£' + Math.round(n).toLocaleString('en-GB'); }
-function businessTakeHome(mk){
-  if (!businessForecast) return 0;
-  const m = businessForecast.months.find(x => x.month === mk);
-  return m ? m.take_home : 0;
-}
-function includeBusiness(){ try { return localStorage.getItem(BF_INCLUDE_KEY) === '1'; } catch(e){ return false; } }
-
-function renderBusiness(){
-  const card = document.getElementById('business-table-card');
-  const upd = document.getElementById('business-updated');
-  if (!businessForecast){ card.style.display = 'none'; upd.textContent = 'Nothing imported yet.'; return; }
-  const f = businessForecast;
-  card.style.display = 'block';
-  upd.textContent = 'Updated ' + (f.updated || 'unknown');
-  const prov = f.tax_rate_is_provisional ? ' Tax is provisional (' + Math.round((f.tax_rate||0)*100) + '%) until the Accountant confirms it.' : '';
-  const target = f.target_monthly ? ' Target take-home: ' + gbp(f.target_monthly.min) + '–' + gbp(f.target_monthly.max) + ' a month.' : '';
-  document.getElementById('business-basis').textContent = (f.basis ? f.basis + ' ' : '') + prov + target;
-  const esc = t => String(t==null?'':t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const th = (t,right) => '<th style="text-align:'+(right?'right':'left')+'; padding:6px 8px; font-size:11px; color:var(--ink-soft); border-bottom:1px solid var(--line);">'+t+'</th>';
-  const td = (t,right,extra) => '<td style="text-align:'+(right?'right':'left')+'; padding:8px; border-bottom:1px solid var(--line); '+(right?'font-variant-numeric:tabular-nums;':'')+(extra||'')+'">'+t+'</td>';
-  const min = f.target_monthly ? f.target_monthly.min : null;
-  let html = '<tr>'+th('Month')+th('Expected',1)+th('Tax (provisional)',1)+th('Take-home',1)+th('Status')+th('Note')+'</tr>';
-  f.months.forEach(m => {
-    const [y,mo] = m.month.split('-');
-    const label = new Date(+y, +mo-1, 1).toLocaleString('en-GB', {month:'short', year:'numeric'});
-    const low = min != null && m.take_home < min;
-    html += '<tr>'+td(label)+td(gbp(m.expected_income),1)+td('−'+gbp(m.tax_to_set_aside),1)
-      +td('<b>'+gbp(m.take_home)+'</b>',1, low ? 'color:var(--red);' : '')+td(esc(m.status))+td('<span class="muted">'+esc(m.note)+'</span>')+'</tr>';
-  });
-  document.getElementById('business-table').innerHTML = html;
-}
-
-document.getElementById('btn-business-import').onclick = () => document.getElementById('business-file').click();
-document.getElementById('business-file').onchange = async (e) => {
-  const file = e.target.files[0]; e.target.value = '';
-  const errEl = document.getElementById('business-error'); errEl.textContent = '';
-  if (!file) return;
-  let data;
-  try { data = JSON.parse(await file.text()); }
-  catch(err){ errEl.textContent = 'Couldn\'t read that file. Choose forecast.json.'; return; }
-  const problem = validateBusinessForecast(data);
-  if (problem){ errEl.textContent = problem + ' Nothing was changed.'; return; }
-  businessForecast = data;
-  try { localStorage.setItem(BF_KEY, JSON.stringify(data)); } catch(err){}
-  if (uid){
-    usersCol().collection('settings').doc('businessForecast').set({ data: JSON.stringify(data), importedAt: Date.now() })
-      .catch(() => toast('Imported here, but couldn\'t sync to your account.'));
-  }
-  renderBusiness(); renderForecast();
-  toast('Imported ' + data.months.length + ' months');
-};
-document.getElementById('forecast-include-business').onchange = (e) => {
-  try { localStorage.setItem(BF_INCLUDE_KEY, e.target.checked ? '1' : '0'); } catch(err){}
-  renderForecast();
-};
-renderBusiness();
 
 /* ---------------------- BILLS ---------------------- */
 function billsWithDays(){
