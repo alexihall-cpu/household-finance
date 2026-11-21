@@ -1,0 +1,253 @@
+/* Kodu components. NOTE: put the app class (k-app-finance / k-app-photos / k-app-recipes) on <html> or <body>, not on an inner wrapper: sheets and toasts are portalled to body and must still see --k-app. Map panels and third-party layers (Leaflet) stay app-local. Was draft: Hand-kept in System/; vendored into apps, never edited there. Needs kodu-tokens.css. */
+
+.k-root { font-family: var(--font-sans); font-size: 16px; line-height: 1.45; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
+.k-root *, .k-root *::before, .k-root *::after { box-sizing: border-box; }
+.k-root :focus-visible { outline: var(--ring-width) solid var(--focus); outline-offset: var(--ring-offset); }
+
+/* Button */
+.k-btn { min-height: var(--tap); padding: 0 16px; border-radius: var(--radius-md); border: 1px solid var(--control-border); background: var(--surface); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: 500 15px/1 var(--font-sans); cursor: pointer; white-space: nowrap; text-decoration: none; transition: transform var(--motion-fast) var(--ease-out); }
+.k-btn--primary { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.k-btn--smart { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-ink); }
+.k-btn--sm { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.k-btn:active:not(:disabled) { transform: translateY(1px); }
+.k-btn--ghost { background: transparent; border-color: transparent; }
+.k-btn--danger { color: var(--negative); }
+.k-btn--block { width: 100%; min-height: 52px; font-size: 16px; border-radius: var(--radius-lg); }
+.k-btn:disabled { opacity: .55; cursor: default; }
+
+/* Chip */
+.k-chip { min-height: 36px; padding: 0 12px; border-radius: var(--radius-pill); border: 1px solid var(--control-border); background: var(--surface); color: var(--ink); display: inline-flex; align-items: center; gap: 6px; font: 400 14px/1 var(--font-sans); cursor: pointer; white-space: nowrap; }
+.k-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.k-chip--smart { border-style: dashed; border-color: var(--accent); color: var(--accent-ink); background: transparent; }
+.k-chip--smart[aria-pressed="true"] { border-style: solid; background: var(--accent-tint); color: var(--accent-ink); }
+
+/* Field */
+.k-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.k-field__box { display: flex; align-items: center; gap: 10px; min-height: var(--size-input); padding: 0 14px; border: 1.5px solid var(--control-border); border-radius: var(--radius-md); background: var(--surface); color: var(--ink-3); }
+.k-field__box:focus-within { border-color: var(--ink); }
+.k-field__box input, .k-field__box select, .k-field__box textarea { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: 400 16px/1.4 var(--font-sans); padding: 12px 0; }
+.k-field__box input::placeholder { color: var(--ink-3); }
+
+/* Card */
+.k-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.k-card--smart { background: var(--accent-tint); border-color: var(--accent); border-style: dashed; }
+.k-label { font: 500 11px/14px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.k-label--lg { font-size: var(--type-label-lg-size); line-height: var(--type-label-lg-line); }
+.k-card--smart .k-label { color: var(--accent-ink); }
+
+/* List item */
+.k-list { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 0 var(--space-4); }
+.k-item { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; border-bottom: 1px solid var(--line); }
+.k-item:last-child { border-bottom: 0; }
+.k-item__thumb { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--fill); flex-shrink: 0; }
+.k-item__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.k-item__title { font-weight: 500; }
+.k-item__meta { font-size: 13px; color: var(--ink-2); }
+
+/* Amount */
+.k-amount { font: 500 16px/1.4 var(--font-sans); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; color: var(--ink); }
+.k-amount--in { color: var(--positive); }
+.k-amount--over { color: var(--negative); }
+.k-amount--hero { font-size: 32px; line-height: 36px; font-weight: 600; text-align: left; }
+
+/* Tag / status pill */
+.k-tag { display: inline-flex; align-items: center; gap: 4px; min-height: 22px; padding: 0 8px; border-radius: var(--radius-pill); font: 500 12px/1 var(--font-sans); border: 1px solid transparent; background: var(--fill); color: var(--ink-2); white-space: nowrap; }
+.k-tag--positive { background: var(--positive-tint); border-color: transparent; color: var(--positive); }
+.k-tag--warn { background: var(--warn-tint); border-color: transparent; color: var(--warn); }
+.k-tag--negative { background: var(--negative-tint); border-color: transparent; color: var(--negative); }
+.k-tag--smart { background: var(--accent-tint); border-color: transparent; color: var(--accent-ink); }
+
+/* Tab bar */
+.k-tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); min-height: var(--tabbar-height); background: var(--surface); border-top: 1px solid var(--line); }
+.k-tab { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 500 12px/1 var(--font-sans); color: var(--ink-3); text-decoration: none; }
+.k-tab svg { stroke-width: 1.5; }
+.k-tab[aria-current="page"] { color: var(--ink); }
+.k-tab[aria-current="page"] svg { stroke-width: 2.2; }
+.k-tab[aria-current="page"]::before { content: ""; position: absolute; top: -1px; left: 30%; right: 30%; height: 2px; border-radius: 2px; background: var(--k-app, var(--ink)); }
+.k-app-finance { --k-app: var(--app-finance); }
+.k-app-photos { --k-app: var(--app-photos); }
+.k-app-recipes { --k-app: var(--app-recipes); }
+
+/* App mark */
+.k-mark { display: inline-flex; align-items: center; gap: 10px; font: 600 18px/1 var(--font-sans); color: var(--ink); }
+.k-mark__tile { width: 32px; height: 32px; border-radius: var(--radius-md); background: var(--k-app, var(--ink)); }
+.k-mark__app { font-weight: 400; color: var(--ink-2); }
+
+/* ===== V1 additions: shared from the apps ===== */
+
+/* Layout shell: tab bar on phone, sidebar from 900px (bp-desktop) */
+.k-shell { min-height: 100%; display: flex; }
+.k-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); }
+.k-tabbar-wrap { position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-sticky); padding-bottom: env(safe-area-inset-bottom); background: var(--surface); }
+.k-sidebar { display: none; }
+.k-gutter { padding-left: var(--space-5); padding-right: var(--space-5); }
+.k-content { width: 100%; max-width: 1120px; margin: 0 auto; }
+@media (min-width: 900px) {
+  .k-sidebar { display: flex; flex-direction: column; gap: var(--space-1); width: var(--sidebar-width); flex-shrink: 0; position: sticky; top: 0; height: 100vh; padding: var(--space-5) 14px; border-right: 1px solid var(--line); background: var(--bg); }
+  .k-sidebar .k-mark { padding: 4px 10px 18px; }
+  .k-side-link { position: relative; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 10px; border-radius: var(--radius-md); text-decoration: none; color: var(--ink-2); font-size: 15px; }
+  .k-side-link:hover { background: var(--fill); color: var(--ink); }
+  .k-side-link[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); font-weight: 500; }
+  .k-side-link[aria-current="page"]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 2px; border-radius: 2px; background: var(--k-app, var(--ink)); }
+  .k-side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .k-main { padding-bottom: 0; }
+  .k-tabbar-wrap { display: none; }
+  .k-gutter { padding-left: var(--space-8); padding-right: var(--space-8); }
+}
+
+/* Top bar */
+.k-top { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-5) var(--space-3); background: var(--bg); }
+.k-top h1 { margin: 0; font: 600 26px/30px var(--font-sans); letter-spacing: -0.01em; }
+.k-top__sub { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.k-top__actions { display: flex; gap: var(--space-2); flex-shrink: 0; align-items: center; }
+.k-top.is-scrolled { border-bottom: 1px solid var(--line); }
+@media (min-width: 900px) { .k-top { padding: var(--space-5) var(--space-8) 14px; } }
+
+/* Segmented control */
+.k-seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: 1px solid var(--control-border); border-radius: var(--radius-md); overflow: hidden; background: var(--surface); }
+.k-seg button { min-height: var(--tap); border: 0; background: transparent; color: var(--ink); font: 400 14px/1 var(--font-sans); cursor: pointer; }
+.k-seg button + button { border-left: 1px solid var(--control-border); }
+.k-seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* Sheet: bottom on phone, centred from 700px */
+.k-sheet-backdrop { position: fixed; inset: 0; z-index: var(--z-sheet); background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; }
+.k-sheet { width: 100%; max-width: 520px; max-height: 88vh; overflow: auto; background: var(--surface); color: var(--ink); border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-float); padding: 10px var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: var(--space-4); }
+.k-sheet__grabber { align-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--line-strong); }
+.k-sheet__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.k-sheet__head h2 { margin: 0; font: 600 18px/24px var(--font-sans); }
+@media (min-width: 700px) { .k-sheet-backdrop { align-items: center; } .k-sheet { border-radius: var(--radius-xl); } }
+
+dialog.k-sheet:not([open]) { display: none; }
+dialog.k-sheet { margin: auto auto 0; border: 0; padding-top: 10px; }
+@media (min-width: 700px) { dialog.k-sheet { margin: auto; } }
+dialog.k-sheet::backdrop { background: var(--scrim); }
+
+/* Toast */
+.k-toast { position: fixed; left: 50%; bottom: calc(var(--tabbar-height) + 16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: var(--z-toast); width: max-content; max-width: min(520px, calc(100vw - 32px)); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--ink); color: var(--bg); font-size: 14px; box-shadow: var(--shadow-float); display: flex; gap: var(--space-3); align-items: center; }
+.k-toast__action { background: none; border: 0; color: inherit; font: 600 14px/1 var(--font-sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: var(--tap); padding: 0 var(--space-2); }
+@media (min-width: 900px) { .k-toast { bottom: var(--space-6); } }
+
+/* Empty state: one sentence, one action, no illustration */
+.k-empty { padding: 48px var(--space-6); text-align: center; color: var(--ink-3); font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.k-empty b { color: var(--ink); font-weight: 500; font-size: 17px; }
+
+/* Notice banner (state only, always with words) */
+.k-banner { display: flex; gap: var(--space-3); align-items: center; padding: 10px var(--space-3); border-radius: var(--radius-md); font-size: 14px; }
+.k-banner--neutral { background: var(--fill); color: var(--ink-2); }
+.k-banner--warn { background: var(--warn-tint); color: var(--warn); }
+.k-banner--negative { background: var(--negative-tint); color: var(--negative); }
+.k-banner--smart { background: var(--accent-tint); color: var(--accent-ink); }
+.k-banner--positive { background: var(--positive-tint); color: var(--positive); }
+
+/* Avatar */
+.k-avatar { width: 36px; height: 36px; border-radius: var(--radius-pill); background: var(--fill); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font: 600 14px/1 var(--font-sans); flex-shrink: 0; overflow: hidden; }
+.k-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.k-avatar--lg { width: 64px; height: 64px; font-size: 20px; }
+
+/* Stepper */
+.k-stepper { display: inline-flex; align-items: center; gap: var(--space-1); }
+.k-stepper__v { min-width: var(--tap); text-align: center; font: 400 14px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+
+/* Switch (on = ink) */
+.k-switch { position: relative; width: 48px; height: 28px; flex-shrink: 0; }
+.k-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; width: 100%; height: 100%; }
+.k-switch span { position: absolute; inset: 0; border-radius: 14px; background: var(--control-border); transition: background var(--motion-fast) var(--ease-out); pointer-events: none; }
+.k-switch span::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 11px; background: var(--bg); transition: transform var(--motion-fast) var(--ease-out); box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.k-switch input:checked + span { background: var(--ink); }
+.k-switch input:checked + span::after { transform: translateX(20px); }
+.k-switch input:focus-visible + span { outline: var(--ring-width) solid var(--focus); outline-offset: var(--ring-offset); }
+
+/* Checkbox */
+.k-check { display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); cursor: pointer; }
+.k-check input { position: absolute; opacity: 0; width: var(--tap); height: var(--tap); margin: 0; cursor: pointer; }
+.k-check span { color: transparent; width: 22px; height: 22px; border: 1.5px solid var(--control-border); border-radius: var(--radius-xs); background: var(--surface); display: inline-flex; align-items: center; justify-content: center; pointer-events: none; }
+.k-check input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.k-check input:focus-visible + span { outline: var(--ring-width) solid var(--focus); outline-offset: var(--ring-offset); }
+
+button.k-check { border: 0; background: transparent; padding: 0; font: inherit; }
+button.k-check[aria-pressed="true"] span { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+
+/* Skeleton: no looping animation (reduced motion, calm) */
+.k-skeleton { background: var(--fill); border-radius: var(--radius-sm); min-height: 14px; }
+
+/* Sticky action bar (e.g. Add to plan / Start cooking): sits above the tab bar on phone, at the bottom on desktop. In-flow, so it never covers the last row. */
+.k-action-bar { position: sticky; bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); z-index: var(--z-sticky); display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-5); background: var(--bg); border-top: 1px solid var(--line); }
+@media (min-width: 900px) { .k-action-bar { bottom: 0; padding-left: var(--space-8); padding-right: var(--space-8); } }
+
+/* Touch: small controls are 36px with a mouse, 44px (var(--tap)) on touch screens */
+@media (pointer: coarse) {
+  .k-btn--sm, .k-chip, .k-tag--tap { min-height: var(--tap); }
+}
+
+/* AppMark, identity C (symbol + logotype + app name). Assets: dist/mark/ (Identity Mark V4). Still held out of the apps until the Identity Designer's app-icon exports land and Alexi signs off the V4 mark.
+   Symbol and logotype are SVG assets (Identity/), coloured with currentColor so they follow --brand-mark. The word 'kodu' is never typed text. */
+.k-mark--brand { gap: 8px; color: var(--brand-mark); font-weight: 400; }
+.k-mark--brand .k-mark__symbol { width: 24px; height: 24px; flex-shrink: 0; color: var(--brand-mark); }
+.k-mark--brand .k-mark__logotype { height: 18px; width: auto; color: var(--brand-mark); }
+.k-mark--brand .k-mark__app { font-weight: 400; color: var(--ink-2); font-size: 18px; }
+.k-mark--sm { gap: 6px; }
+.k-mark--sm .k-mark__symbol { width: 16px; height: 16px; }
+.k-mark--sm .k-mark__logotype { height: 13px; }
+.k-mark--sm .k-mark__app { font-size: 13px; }
+.k-mark--on-tile { color: var(--brand-mark-on-dark); }
+
+/* Identity tile (icon-style tile behind the symbol): deep colour in both themes, cream art. */
+.k-tile { display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-icon); background: var(--k-app-tile, var(--ink)); color: var(--brand-mark-on-dark); }
+.k-app-finance { --k-app-tile: var(--app-finance-tile); }
+.k-app-photos { --k-app-tile: var(--app-photos-tile); }
+.k-app-recipes { --k-app-tile: var(--app-recipes-tile); }
+
+/* Icons: inline SVG or <svg class="k-icon"><use href="icons/kodu-icons-sprite.svg#overview"/></svg> (same origin). Tab bar uses 22px. */
+.k-icon { width: var(--size-icon); height: var(--size-icon); flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.k-tab .k-icon { width: var(--size-icon-tab); height: var(--size-icon-tab); }
+
+/* Top bar back button: sits left of the title inside .k-top */
+.k-top__back { display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); margin-left: calc(var(--space-2) * -1); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink); cursor: pointer; flex-shrink: 0; }
+
+/* Month switcher: prev, label, next */
+.k-month { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.k-month__label { flex: 1; text-align: center; font: 600 16px/1.2 var(--font-sans); }
+.k-month button { width: var(--tap); height: var(--tap); display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--control-border); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); cursor: pointer; }
+
+/* Meter: budget progress. Over budget turns the bar negative and must carry words in .k-meter__note */
+.k-meter { display: flex; flex-direction: column; gap: var(--space-1); }
+.k-meter__track { height: 8px; border-radius: var(--radius-pill); background: var(--fill); overflow: hidden; }
+.k-meter--lg .k-meter__track { height: 10px; }
+.k-meter__bar { height: 100%; border-radius: inherit; background: var(--ink); }
+.k-meter--over .k-meter__bar { background: var(--negative); }
+.k-meter__note { font: 500 12px/16px var(--font-sans); color: var(--ink-2); }
+.k-meter--over .k-meter__note { color: var(--negative); }
+
+/* Link: ink with underline (blue is reserved for smart things) */
+.k-link { color: var(--link); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Row icon: 36px circle at the start of a list row */
+.k-item__icon { width: 36px; height: 36px; border-radius: var(--radius-pill); background: var(--fill); color: var(--ink-2); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.k-item__icon--warn { background: var(--warn-tint); color: var(--warn); }
+.k-item__icon--smart { background: var(--accent-tint); color: var(--accent-ink); }
+.k-item__icon--negative { background: var(--negative-tint); color: var(--negative); }
+
+/* Definition list for sheets: label left, value right */
+.k-dl { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2) var(--space-4); font-size: 14px; margin: 0; }
+.k-dl dt { color: var(--ink-2); }
+.k-dl dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Chip row that scrolls sideways on phone; a clipped chip at the edge shows there is more */
+.k-chips { display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; margin: 0 calc(var(--space-5) * -1); padding: 0 var(--space-5); }
+.k-chips::-webkit-scrollbar { display: none; }
+@media (min-width: 900px) { .k-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; } }
+
+/* Day header above a grouped list */
+.k-label--day { display: block; padding: var(--space-4) 0 var(--space-2); }
+.k-label--day:first-child { padding-top: 0; }
+
+/* Slider: style a native <input type="range" class="k-slider">; 4px track, 24px thumb, 44px hit area. Show the value in text beside it. */
+.k-slider { -webkit-appearance: none; appearance: none; width: 100%; height: var(--tap); background: transparent; margin: 0; cursor: pointer; --k-fill: 0%; }
+.k-slider::-webkit-slider-runnable-track { height: 4px; border-radius: var(--radius-pill); background: linear-gradient(to right, var(--ink) var(--k-fill), var(--fill) var(--k-fill)); }
+.k-slider::-moz-range-track { height: 4px; border-radius: var(--radius-pill); background: var(--fill); }
+.k-slider::-moz-range-progress { height: 4px; border-radius: var(--radius-pill); background: var(--ink); }
+.k-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); }
+.k-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); }
+.k-slider:focus-visible { outline: none; }
+.k-slider:focus-visible::-webkit-slider-thumb { outline: var(--ring-width) solid var(--focus); outline-offset: var(--ring-offset); }
+.k-slider:focus-visible::-moz-range-thumb { outline: var(--ring-width) solid var(--focus); outline-offset: var(--ring-offset); }
