@@ -279,7 +279,7 @@
 .count { display: inline-flex; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: var(--ink); color: var(--bg); font: 600 12px/22px var(--font-sans); justify-content: center; margin-left: 6px; vertical-align: 2px; }
 .split3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); border-top: 1px solid var(--line); padding-top: var(--space-3); }
 .split3 a { display: flex; gap: 8px; align-items: center; min-height: var(--tap); color: inherit; text-decoration: none; font-size: 13px; }
-.split3 a > span:last-child { display: flex; flex-direction: column; } .split3 b { font-size: 15px; font-weight: 600; }
+.split3 a > span:last-child { display: flex; flex-direction: column; white-space: nowrap; } @media (max-width:899px){ .split3 a { flex-direction: column; align-items: flex-start; gap: 4px; } } .split3 b { font-size: 15px; font-weight: 600; }
 .acct-list { padding: 0 var(--space-4); gap: 0; }
 .acct-row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) 140px; align-items: center; gap: var(--space-4); min-height: 72px; border-bottom: 1px solid var(--line); }
 .acct-row:last-child { border-bottom: 0; }
@@ -365,6 +365,7 @@
   .bars{display:flex; gap:4px; align-items:flex-end; height:44px; padding-left:34px;} .bars i{width:20px; background:var(--ink-2); border-radius:2px 2px 0 0; min-height:2px;} .bars i.z{background:var(--line); height:2px !important;}
   .plan-row--compact{grid-template-columns:48px 44px minmax(0,1fr) auto !important; min-height:64px;} @media (max-width:899px){ .plan-row--compact{grid-template-columns:44px minmax(0,1fr) auto !important;} }
   .file-name{overflow-wrap:normal; word-break:normal;}
+  .k-chart text{fill:var(--ink-2); font:400 12px/16px var(--font-sans);} .k-chart text.ch-low{fill:var(--ink); font-weight:600; paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round;}
   .k-chart line.ch-month{stroke:var(--line); stroke-width:1;} .k-chart line.ch-todayline{stroke:var(--ink-3); stroke-width:1; stroke-dasharray:3 3;}
   .k-chart line.ch-comfort{stroke:var(--ink-3); stroke-width:1;} .plan-chart + .k-legend, .plan-chart ~ .k-legend{margin-top:8px;}
   button.k-link{border:0; background:none; padding:0 8px; cursor:pointer; font:inherit; text-decoration:underline; color:var(--ink);}
@@ -470,7 +471,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v40 · 2026-11-21';
+const APP_VERSION = 'v41 · 2026-11-21';
 
 /* =====================================================================
    FIREBASE CONFIG — paste the values from your Firebase project here
@@ -586,9 +587,34 @@ function lastUpdatedText(a){
 }
 function backupOk(){ try { return localStorage.getItem('kodu-backup-ok') === '1'; } catch(e){ return false; } }
 function virtualAccounts(){ return accounts.some(a => a.virtual); }
+/* Empty states (Build Spec V3 §0): what it does, why it's empty, one button that turns it on */
+function emptyHtml(what, why, btn){ return `<div class="k-empty"><b>${what}</b>${why || ''}${btn ? `<div style="margin-top:12px">${btn}</div>` : ''}</div>`; }
+function backupBtn(){ return `<button class="k-btn k-btn--primary" type="button" data-backup>Download a backup</button>`; }
+function addAcctBtn(label, q){ return virtualAccounts() ? backupBtn() : `<a class="k-btn" href="/accounts?sheet=account${q || ''}">${label || 'Add account'}</a>`; }
+function startSavings(){ const b = parseFloat(settingsDoc.startBalance) || 0; return b > 0 ? {balance: b, monthly: avgMonthlySpend() > 0 ? derivedMonthlySaving() : 0, comfort: 2000} : null; }
+function setupSavings(v){
+  if (virtualAccounts()){ toast('Download a backup first.'); return; }
+  usersCol().collection('accounts').add({name:'Joint savings', bank:'', type:'savings', owner:'joint', balance:v.balance, balanceDate:new Date().toISOString(), balanceSource:'manual', monthlySaving:v.monthly, comfortLine:v.comfort, remindStatements:false, archived:false, order:accounts.length + 1, rules:{transferPatterns:[], keywordOverrides:{}}}).then(() => toast('Joint savings is set up')).catch(saveFail);
+}
+function savingsEmptyHtml(){
+  const s = startSavings(), blocked = virtualAccounts() ? ' Download a backup first: Plan switches on after it.' : '';
+  if (s) return emptyHtml('Set up Joint savings from your current figures', `${money(s.balance,{dp:0})} today${s.monthly ? ', ' + money(s.monthly,{dp:0}) + ' a month' : ''}. Comfort line ${money(s.comfort,{dp:0})}.${blocked}`, virtualAccounts() ? backupBtn() : `<div class="row" style="gap:8px;flex-wrap:wrap"><button class="k-btn k-btn--primary" type="button" data-setup-savings>Set it up</button><a class="k-btn k-btn--ghost" href="/accounts?sheet=account&t=savings">Add a different account</a></div>`);
+  return emptyHtml('Add a savings account', 'It lets Kodu Finance check you stay above your comfort line.' + blocked, addAcctBtn('Add a savings account', '&t=savings'));
+}
+function personName(w){ const n = peopleNames(); return w === 'me' ? (n.me || 'you') : n.partner; }
+function whoEmptyHtml(w){
+  if (w !== 'me' && w !== 'partner') return ''; if (acctsOf(w).length) return '';
+  const n = personName(w);
+  return `<div class="k-card" style="margin-bottom:var(--space-4)">${emptyHtml('No accounts for ' + escapeHtml(n) + ' yet', 'Everything here fills in once there is one.', addAcctBtn('Add an account for ' + escapeHtml(n), '&o=' + w))}</div>`;
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-setup-savings]'); if (t){ const num = id => { const el = document.getElementById(id); if (!el) return null; const v = parseFloat(el.value); return isNaN(v) ? null : v; }; const d = startSavings() || {};
+    setupSavings({balance: num('sv-bal') ?? d.balance ?? 0, monthly: num('sv-mo') ?? d.monthly ?? 0, comfort: num('sv-cf') ?? d.comfort ?? 2000}); return; }
+  const f = e.target.closest && e.target.closest('[data-focus-setup]'); if (f){ const c = document.getElementById('sv-card'); if (c){ c.scrollIntoView({behavior:'smooth', block:'center'}); const i = c.querySelector('input, a, button'); if (i) i.focus({preventScroll:true}); } }
+});
 function updateBackupBanner(){
   const el = document.getElementById('backup-banner'); if (!el) return; const show = virtualAccounts();
-  el.style.display = show ? '' : 'none'; if (show) el.innerHTML = `<div class="k-banner k-banner--warn" style="margin:0 var(--space-4)">${icon('warning')}<span><b>One step before accounts start.</b> Download a backup of everything first. Then your two accounts are set up and nothing is changed or lost.</span><button class="k-btn k-btn--sm" type="button" id="btn-backup-first">Download a backup</button></div>`;
+  el.style.display = show ? '' : 'none'; if (show) el.innerHTML = `<div class="k-banner k-banner--warn" style="margin:0 var(--space-4)">${icon('warning')}<span><b>Download a backup first.</b> Then Accounts, the Inbox and Plan switch on, and nothing is changed or lost.</span><button class="k-btn k-btn--sm" type="button" id="btn-backup-first">Download a backup</button></div>`;
 }
 function seedAccountsOnce(snap){
   if (!backupOk()) return;
@@ -968,8 +994,8 @@ function renderBudgets(){
   const byAcc = spendByAccount(w, mk), accMax = Math.max(1, ...byAcc.map(x => x.v)), prevK = (() => { const [y,m] = mk.split('-').map(Number); const d = new Date(y, m-2, 1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })();
   const now = spendTotal(w, mk), before = spendTotal(w, prevK), diff = now - before;
   let detail = `<div class="pane-detail stack">
-    <section class="k-card" style="gap:var(--space-3)"><h2 class="h-card">Where ${w==='all'?'the':escapeHtml(ownerName(w).toLowerCase())} money went</h2>${byAcc.length ? byAcc.map(x => `<div class="stack" style="gap:6px"><div class="row between"><span class="row" style="gap:8px">${whoBadge(x.owner)}${escapeHtml(x.name)}</span><b class="tnum">${money(x.v)}</b></div><div class="mini-meter"><i style="width:${Math.round(x.v/accMax*100)}%"></i></div></div>`).join('') : '<p class="muted">Nothing spent yet this month.</p>'}</section>
-    <section class="k-card" style="gap:var(--space-2)"><h2 class="h-card">Compared with last month</h2>${before ? `<div class="figure-md tnum">${diff<=0?'':'+'}${money(diff,{sign:false}).replace('−','−')}</div><p class="muted">${money(now)} so far this month, against ${money(before)} in ${escapeHtml(monthName(prevK).split(' ')[0])}. ${diff<=0?'Lower, so far.':'Higher, so far.'}</p>` : `<p class="muted">No spending in ${escapeHtml(monthName(prevK).split(' ')[0])} to compare with yet.</p>`}</section></div>`;
+    <section class="k-card" style="gap:var(--space-3)"><h2 class="h-card">Where ${w==='all'?'the':escapeHtml(ownerName(w).toLowerCase())} money went</h2>${byAcc.length ? byAcc.map(x => `<div class="stack" style="gap:6px"><div class="row between"><span class="row" style="gap:8px">${whoBadge(x.owner)}${escapeHtml(x.name)}</span><b class="tnum">${money(x.v)}</b></div><div class="mini-meter"><i style="width:${Math.round(x.v/accMax*100)}%"></i></div></div>`).join('') : emptyHtml("Add this month's bank files to see where it went", 'Nothing is recorded for this month yet.', '<a class="k-btn" href="/inbox">Open Inbox</a>')}</section>
+    <section class="k-card" style="gap:var(--space-2)"><h2 class="h-card">Compared with last month</h2>${before ? `<div class="figure-md tnum">${diff<=0?'':'+'}${money(diff,{sign:false}).replace('−','−')}</div><p class="muted">${money(now)} so far this month, against ${money(before)} in ${escapeHtml(monthName(prevK).split(' ')[0])}. ${diff<=0?'Lower, so far.':'Higher, so far.'}</p>` : `<p class="muted">Shows once there are two months of statements.</p>`}</section></div>`;
   let isDetail = false;
   if (sc === 'category'){
     const c = categories.find(x => x.id === routeNow.id);
@@ -985,7 +1011,7 @@ function renderBudgets(){
         : `<div class="k-empty"><b>Nothing in ${escapeHtml(c.name)} yet</b>Transactions you put in this category show here.</div>`}
     </div>`;
   }
-  root.innerHTML = `<div class="panes${isDetail?' is-detail':''}">${listPane}${detail}</div>`;
+  root.innerHTML = whoEmptyHtml(w) + `<div class="panes${isDetail?' is-detail':''}">${listPane}${detail}</div>`;
 }
 
 /* ---------------------- DUPLICATE DETECTION ---------------------- */
@@ -1078,8 +1104,8 @@ function renderTransactions(){
     desk = `<div class="k-card" style="padding:var(--space-2) var(--space-4)"><div class="k-trow k-trow--head"><span class="k-label">Date</span><span class="k-label">Description</span><span class="k-label">Category</span><span class="k-label">Account</span><span class="k-label">Amount</span></div>${rows.map(t => `<div class="k-trow" tabindex="0" role="button" data-txn="${t.id}"><span class="tnum muted">${escapeHtml(shortDate(t.date))}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${displayDesc(t.description)}${dupAll.has(t.id)?' <span class="k-tag k-tag--warn">Possible duplicate</span>':''}</span><span>${isTransfer(t)?`<span class="k-tag">${icon('transfer',14)} Transfer</span>`:isUncat(t)?'<span class="k-tag k-tag--warn">Needs a category</span>':escapeHtml(t.category)}</span><span class="acct-cell">${whoBadge(ownerOfTx(t))}${escapeHtml(acctName(t))}</span>${amt(t)}</div>`).join('')}</div>`;
   }
   const empty = q ? `<div class="k-empty"><b>Nothing matches “${escapeHtml(routeNow.q)}”</b>Search looks through every month.</div>`
-    : `<div class="k-empty"><b>No transactions here</b>${filter==='all'?'Add a statement to fill this month.':'Nothing in this filter for this month.'}</div>`;
-  root.innerHTML = `<div class="stack">
+    : `<div class="k-empty"><b>No transactions here</b>${filter==='all'?'Add a statement to fill this month.<div style="margin-top:12px"><a class="k-btn" href="/inbox">Open Inbox</a></div>':'Nothing in this filter for this month.'}</div>`;
+  root.innerHTML = whoEmptyHtml(curWho('transactions')) + `<div class="stack">
     <div class="row" style="gap:var(--space-3);flex-wrap:wrap"><form class="k-field" id="txn-search-form" role="search" style="flex:1;min-width:220px;margin:0"><label class="sr-only" for="txn-q">Search</label><div class="k-field__box">${icon('search')}<input id="txn-q" type="search" placeholder="Search all accounts and months" value="${escapeHtml(qv)}" autocomplete="off"></div></form>
       <label class="k-field" style="margin:0;min-width:200px"><span class="sr-only">Account</span><div class="k-field__box"><select id="txn-acct" aria-label="Account"><option value="">All accounts</option>${liveAccounts().filter(a => w === 'all' || a.owner === w || w === 'joint').map(a => `<option value="${escapeHtml(a.id)}"${a.id===routeNow.account?' selected':''}>${escapeHtml(a.name)}</option>`).join('')}</select></div></label></div>
     ${q ? `<div class="row between"><span class="muted">${rows.length} result${rows.length===1?'':'s'} across all months</span><a class="k-link" href="${txnUrl(mk, filter, '')}">Clear</a></div>` : monthSwitcher(mk)}
@@ -1503,20 +1529,20 @@ function renderInbox(){
     .map(s => ({id:'s'+s.id, fileName:s.fileName || 'Statement', status:'in', accountId:s.accountId, statementId:s.id, when:s.importedAt, note:`${s.rows} transaction${s.rows===1?'':'s'}${s.closingBalance != null ? ' · balance ' + money(Math.abs(s.closingBalance)) : ''}`}));
   const items = inboxItems.concat(stRows);
   const addedToday = items.filter(i => i.status === 'in' && i.when && new Date(i.when).toDateString() === new Date().toDateString()).length;
-  const folderCard = !FS_OK ? '' : `<section class="k-card folder hide-mobile"><span class="goal__emoji">${icon('document',24)}</span>
+  let folderCard = !FS_OK ? `<section class="k-card folder"><span class="goal__emoji">${icon('document',24)}</span><div class="k-item__text"><span class="k-label">Statements folder</span><b style="font-weight:600;font-size:16px">Not available here</b><span class="muted">Open Kodu Finance in Chrome or Edge on your computer to have a folder read by itself. Here, drop files instead.</span></div></section>` : `<section class="k-card folder hide-mobile"><span class="goal__emoji">${icon('document',24)}</span>
     <div class="k-item__text"><span class="k-label">Statements folder</span><b class="file-name" style="font-weight:600;font-size:16px">${folderHandle ? escapeHtml(folderHandle.name) : 'Not chosen yet'}</b><span class="muted">${folderState === 'needs-permission' ? 'Kodu Finance needs your OK to read it again.' : folderHandle ? (folderChecked ? 'Checked ' + escapeHtml(lastStampText(folderChecked)) + '. Checked again each time Kodu Finance opens.' : 'Checked each time Kodu Finance opens.') : 'Choose where you save bank files and new ones are read for you.'}</span></div>
     ${folderState === 'needs-permission' ? '<button class="k-btn k-btn--primary k-btn--sm" type="button" id="btn-allow-folder">Allow reading the folder</button>' : `<button class="k-btn k-btn--sm" type="button" id="btn-choose-folder">${folderHandle ? 'Change' : 'Choose folder'}</button>`}</section>`;
+  if (virtualAccounts() && FS_OK) folderCard = folderCard.replace(/<button[^>]*id="btn-(choose|allow)-folder"[^>]*>[^<]*<\/button>/, '<button class="k-btn k-btn--sm" type="button" data-backup>Download a backup</button>').replace(/<span class="muted">[^<]*<\/span>/, '<span class="muted">Switches on after you download a backup.</span>');
   const checklist = list.map(a => { const has = hasStatement(a, pk); return `<div class="k-item" style="min-height:52px">${whoBadge(a.owner)}<div class="k-item__text"><span class="k-item__title">${escapeHtml(a.name)}</span>${has ? '' : `<span class="k-item__meta">${escapeHtml(a.bank || 'Your bank')} app or website › Statements › Download CSV</span>`}</div><span class="k-item__trail">${has ? `<span class="pill-ok">${icon('check',16)}In</span>` : '<span class="k-tag k-tag--warn">Waiting</span>'}</span></div>`; }).join('');
   root.innerHTML = `<div class="grid-2"><div class="stack" style="gap:var(--space-4)">${folderCard}
     <div class="k-banner hide-desktop" style="font-size:14px">${icon('document',18)}<span>On your computer, Kodu Finance reads new files from your statements folder by itself. On a phone, add them here.</span></div>
-    ${FS_OK ? '' : `<div class="k-banner hide-mobile" style="font-size:14px">${icon('document',18)}<span>This browser can't watch a folder. Drop your bank files here, or use Chrome or Edge on a computer to have them read automatically.</span></div>`}
-    <div class="k-drop" id="dropzone">${icon('upload',28)}<span>Drop bank files here, any account, as many as you like</span><span class="hint">CSV or PDF · read on this device · the account is worked out from the file</span><input type="file" id="file-input" multiple accept=".csv,text/csv,.pdf,application/pdf" style="display:none"><button class="k-btn${DESK_MQ.matches ? '' : ' k-btn--primary'}" type="button" id="btn-browse">Choose files</button></div>
+    <div class="k-drop" id="dropzone"${virtualAccounts() ? ' aria-disabled="true" style="opacity:.7"' : ''}>${icon('upload',28)}<span>${virtualAccounts() ? 'Switches on after you download a backup' : 'Drop bank files here, any account, as many as you like'}</span><span class="hint">CSV or PDF · read on this device · the account is worked out from the file</span><input type="file" id="file-input" multiple accept=".csv,text/csv,.pdf,application/pdf" style="display:none"><button class="k-btn${DESK_MQ.matches ? '' : ' k-btn--primary'}" type="button" ${virtualAccounts() ? 'data-backup>Download a backup' : 'id="btn-browse">Choose files'}</button></div>
     ${inboxBusy ? `<div class="k-banner">${icon('smart',18)}<span>Reading files…</span></div>` : ''}
     ${importWarn.text ? `<div class="k-banner k-banner--warn">${icon('warning')}<span>${importWarn.html ? importWarn.text : escapeHtml(importWarn.text)}</span></div>` : ''}
-    <section class="k-section"><div class="k-section__head"><h2>Latest files</h2><span class="muted">${addedToday} added today</span></div>
+    <section class="k-section"><div class="k-section__head"><h2>Latest files</h2>${addedToday ? `<span class="muted">${addedToday} added today</span>` : ''}</div>
       ${items.length ? `<div class="k-card" style="padding:0 var(--space-4)"><div class="flat-list">${items.map(fileRowHtml).join('')}</div></div>` : `<div class="k-card"><div class="k-empty"><b>No files yet</b>Drop a bank file above, or save one in your statements folder.</div></div>`}</section>
-    <a class="k-link" href="/inbox?sheet=paste">No file? Paste the lines instead</a></div>
-    <div class="stack" style="gap:var(--space-4)"><section class="k-card" style="gap:var(--space-2)"><div class="row between"><h2 class="h-card">${escapeHtml(monthName(pk).split(' ')[0])}, account by account</h2><span class="muted tnum">${inN} of ${list.length} in</span></div><div class="flat-list">${checklist}</div></section>
+    ${virtualAccounts() ? '<span class="hint">Pasting lines switches on after you download a backup.</span>' : '<a class="k-link" href="/inbox?sheet=paste">No file? Paste the lines instead</a>'}</div>
+    <div class="stack" style="gap:var(--space-4)"><section class="k-card" style="gap:var(--space-2)"><div class="row between"><h2 class="h-card">${escapeHtml(monthName(pk).split(' ')[0])}, account by account</h2><span class="muted tnum">${inN} of ${list.length} in</span></div>${list.length ? `<div class="flat-list">${checklist}</div>` : emptyHtml('Add your accounts so the inbox knows which file is which', '', addAcctBtn('Add account'))}</section>
     <details class="k-card rules" style="gap:var(--space-2)"><summary class="row between"><span class="h-card">How the inbox works</span><span class="muted">${icon('chevron-right',16)}</span></summary>
       <div class="rule">${icon('account',18)}<div><b>Knows the account</b> <span class="muted">from the last 4 digits inside the file, not the file name.</span></div></div>
       <div class="rule">${icon('check',18)}<div><b>Never adds anything twice.</b> <span class="muted">Overlapping files and re-downloads are skipped line by line.</span></div></div>
@@ -1535,7 +1561,7 @@ document.addEventListener('click', e => {
   const u = t.closest('[data-undo-st]'); if (u){ const id = u.dataset.undoSt; undoStatement(id).then(() => { inboxItems = inboxItems.filter(i => i.statementId !== id); toast('Undone. Its transactions were removed.'); renderInbox(); renderShell(); }).catch(saveFail); return; }
 });
 document.addEventListener('change', e => { if (e.target.id === 'file-input' && e.target.files.length){ ingestFiles([...e.target.files], 'drop'); e.target.value = ''; } });
-document.addEventListener('drop', e => { const dz = e.target.closest && e.target.closest('#dropzone'); if (dz){ e.preventDefault(); dz.style.borderColor = ''; if (e.dataTransfer.files.length) ingestFiles([...e.dataTransfer.files], 'drop'); } });
+document.addEventListener('drop', e => { const dz = e.target.closest && e.target.closest('#dropzone'); if (dz && virtualAccounts()){ e.preventDefault(); toast('Download a backup first.'); return; } if (dz){ e.preventDefault(); dz.style.borderColor = ''; if (e.dataTransfer.files.length) ingestFiles([...e.dataTransfer.files], 'drop'); } });
 
 function checkSub(){
   const dates = (rowState.length ? rowState.map(r => r.date) : mappedRows.map(r => r.date)).filter(Boolean).sort();
@@ -1616,6 +1642,7 @@ async function confirmImport(){
 }
 
 SHEETS.paste = (host) => {
+  if (virtualAccounts()){ host.innerHTML = sheetShell('Paste the lines', emptyHtml('Pasting switches on after the backup', 'Download a backup first. Nothing is changed or lost.', backupBtn())); return; }
   host.innerHTML = sheetShell('Paste the lines', `
     <label class="k-field"><span>Which account?</span><div class="k-field__box"><select id="paste-acct">${liveAccounts().map(a => `<option value="${escapeHtml(a.name)}"${a.name===importAccount?' selected':''}>${escapeHtml(a.name)} · ${escapeHtml(ownerName(a.owner))}</option>`).join('')}</select></div></label>
     <div class="k-field"><label for="paste-input">One per line: date, description, amount</label><div class="k-field__box"><textarea id="paste-input" rows="6" placeholder="01/08/2026, TESCO STORES, -41.20"></textarea></div></div>
@@ -1933,7 +1960,7 @@ function planStatus(w){ // per account OK/Low, and the headline
 }
 /* the chart: SVG, colours from CSS variables only */
 function planChartSvg(series, o){
-  o = o || {}; const desk = DESK_MQ.matches, W = desk ? (o.W || 640) : Math.min(o.W || 640, 350), H = desk ? (o.H || 240) : Math.min(o.H || 240, 230), PL = o.axis ? 22 : 8, PB = o.axis ? (DESK_MQ.matches ? 56 : 72) : 10, PR = o.PR != null ? (desk ? o.PR : Math.min(o.PR, 88)) : (desk ? 112 : 88), PT = o.PT != null ? o.PT : 46;
+  o = o || {}; const desk = DESK_MQ.matches, W = desk ? (o.W || 640) : Math.min(o.W || 640, 350), H = desk ? (o.H || 240) : Math.min(o.H || 240, 230), PL = o.axis ? 22 : 8, PB = o.axis ? (DESK_MQ.matches ? 56 : 72) + (monthKeyAtOffset(0).slice(5) === '01' ? 16 : 0) : 10, PR = o.PR != null ? (desk ? o.PR : Math.min(o.PR, 88)) : (desk ? 112 : 88), PT = o.PT != null ? o.PT : 46;
   const base = series[0], all = []; series.forEach(s => s.pts.forEach(p => { all.push(p.pre, p.post); })); all.push(o.comfort || 0);
   const PN = (base.past || []).length; (base.past || []).forEach(v => all.push(v));
   const hi = Math.max(...all, 1), lo = Math.min(...all, o.comfort || 0), min = Math.min(0, lo), max = hi * 1.06, rng = (max - min) || 1;
@@ -1942,15 +1969,15 @@ function planChartSvg(series, o){
   const cy = y(o.comfort || 0), bandH = Math.max(0, (H - PB) - cy);
   const lowPts = []; // red wherever a series goes below the comfort line
   if (o.redBelow && o.comfort != null){ const s = series[0]; for (let i = 1; i <= FORE_N; i++){ if (s.pts[i].post < o.comfort) lowPts.push(`<path d="M${x(i).toFixed(1)} ${y(Math.min(s.pts[i].pre, s.pts[i].post)).toFixed(1)} L${x(i).toFixed(1)} ${y(s.pts[i].post).toFixed(1)} L${(i<FORE_N?x(i+1):x(i)).toFixed(1)} ${y(i<FORE_N?s.pts[i+1].pre:s.pts[i].post).toFixed(1)}" fill="none" stroke="var(--negative)" stroke-width="2"/>`); } }
-  let axis = ''; if (o.axis){ for (let i = -PN; i <= FORE_N; i++){ const mk = monthKeyAtOffset(i), mo = +mk.slice(5), px = x(i).toFixed(1), lab = i === 0 && desk ? 'Today' : (desk ? monthShort(mk) : monthLong(mk)[0]);
+  let axis = ''; if (o.axis){ for (let i = -PN; i <= FORE_N; i++){ const mk = monthKeyAtOffset(i), mo = +mk.slice(5), px = x(i).toFixed(1), lab = desk ? monthShort(mk) : monthLong(mk)[0];
       axis += `<text x="${px}" y="${(H - PB + 26).toFixed(1)}" text-anchor="middle" style="${i===0?'font-weight:700;fill:var(--ink)':''}">${escapeHtml(lab)}</text>`;
-      if (i === 0 && !desk) axis += `<text x="${px}" y="${(H - PB + 42).toFixed(1)}" text-anchor="start" style="font-weight:700;fill:var(--ink)" dx="-10">Today</text>`;
-      if (mo === 1){ axis += `<text x="${px}" y="${(H - PB + (desk ? 42 : 58)).toFixed(1)}" text-anchor="middle">${mk.slice(0,4)}</text>`; } } }
+      if (i === 0) axis += `<text x="${px}" y="${(H - PB + 42).toFixed(1)}" text-anchor="middle" style="font-weight:700;fill:var(--ink)">Today</text>`;
+      if (mo === 1){ axis += `<text x="${px}" y="${(H - PB + (i === 0 ? 58 : (desk ? 42 : 58))).toFixed(1)}" text-anchor="middle">${mk.slice(0,4)}</text>`; } } }
   let grid = ''; if (o.axis){ for (let i = -PN; i <= FORE_N; i++){ if (i === 0) continue; grid += `<line class="ch-month" x1="${x(i).toFixed(1)}" x2="${x(i).toFixed(1)}" y1="${PT}" y2="${(H - PB).toFixed(1)}"/>`; } grid += `<line class="ch-todayline" x1="${x(0).toFixed(1)}" x2="${x(0).toFixed(1)}" y1="${PT}" y2="${(H - PB + 4).toFixed(1)}"/>`; }
   const marks = (o.marks || []).map((m, k) => { const px = x(m.i), py = y(m.v), lab = m.label ? `<text x="${px.toFixed(1)}" y="${(PT - 8 - (k % 2) * 16).toFixed(1)}" text-anchor="middle" style="font-weight:600;fill:var(--ink)">${escapeHtml(m.label)}</text><line x1="${px.toFixed(1)}" x2="${px.toFixed(1)}" y1="${(PT - 4 - (k % 2) * 16).toFixed(1)}" y2="${py.toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="2 3"/>` : '';
     return `${lab}<g class="mk" ${m.id ? `tabindex="0" role="button" data-buy="${escapeHtml(m.id)}" aria-label="${escapeHtml(m.aria||m.label||'')}"` : ''}><circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="22" fill="transparent"/><circle class="mk__ring" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/></g>`; }).join('');
   const lowY = o.lowLabel ? (y(o.lowLabel.v) + 20 > H - PB - 8 ? y(o.lowLabel.v) - 12 : y(o.lowLabel.v) + 20) : 0;
-  const lowLab = o.lowLabel ? `<text x="${x(o.lowLabel.i).toFixed(1)}" y="${lowY.toFixed(1)}" text-anchor="${o.lowLabel.i < 2 ? 'start' : 'middle'}">${escapeHtml(o.lowLabel.text)}</text>` : '';
+  const lowLab = o.lowLabel ? `<text class="ch-low" x="${x(o.lowLabel.i).toFixed(1)}" y="${lowY.toFixed(1)}" text-anchor="${o.lowLabel.i < 2 ? 'start' : 'middle'}">${escapeHtml(o.lowLabel.text)}</text>` : '';
   const endV = base.pts[FORE_N].post;
   const side = o.noSide ? '' : `<text x="${(W - PR + 8)}" y="${(y(endV) - 2).toFixed(1)}" style="font-weight:600;fill:var(--ink)">${escapeHtml(money(endV,{dp:0}))}</text><text x="${(W - PR + 8)}" y="${(y(endV) + 14).toFixed(1)}">in savings</text>
     <text x="${(W - PR + 8)}" y="${(cy - 2).toFixed(1)}" style="font-weight:600;fill:var(--ink)">${escapeHtml(money(o.comfort||0,{dp:0}))}</text><text x="${(W - PR + 8)}" y="${(cy + 14).toFixed(1)}">${o.total ? 'comfort total' : 'comfort line'}</text>`;
@@ -1973,7 +2000,21 @@ function renderPlan(){
   const root = document.getElementById('plan-root'); if (!root) return;
   if (!accounts.length){ root.innerHTML = skeleton(); return; }
   const w = planWho(), st = planStatus(w), tabs = planTabs('plan');
-  if (!st.list.length){ root.innerHTML = tabs + `<div class="k-card"><div class="k-empty"><b>No savings account here yet</b>Add a savings account and set what you save each month to see where your money is heading.<br><a class="k-btn" style="margin-top:12px" href="/accounts?sheet=account">Add a savings account</a></div></div>`; return; }
+  if (!st.list.length){
+    const income0 = incomeSummary(), any = savingsIn('all').length > 0, nm = (w === 'me' || w === 'partner') ? personName(w) : ownerName(w), d0 = startSavings() || {};
+    const setup = any ? emptyHtml('No savings account for ' + escapeHtml(nm) + ' yet', 'Its forecast, comfort line and planned buys appear once there is one.', addAcctBtn('Add a savings account for ' + escapeHtml(nm), '&t=savings&o=' + (w === 'all' ? 'joint' : w)))
+      : `<div class="k-empty" style="align-items:stretch;text-align:left"><b>No savings account yet</b>${virtualAccounts() ? 'Download a backup first: Plan switches on after it.' : (d0.balance ? 'Your old forecast had these figures. Check them, then set up Joint savings.' : 'Add what you have and what you save each month to see where your money is heading.')}
+        <div class="row" style="gap:var(--space-3);flex-wrap:wrap;margin-top:12px"><label class="k-field" style="flex:1;min-width:150px"><span>Balance today</span><div class="k-field__box"><span>£</span><input id="sv-bal" type="number" inputmode="decimal" value="${d0.balance != null ? d0.balance : ''}" placeholder="5000"></div></label><label class="k-field" style="flex:1;min-width:150px"><span>Save each month</span><div class="k-field__box"><span>£</span><input id="sv-mo" type="number" inputmode="decimal" value="${d0.monthly ? d0.monthly : ''}" placeholder="e.g. 300"></div></label><label class="k-field" style="flex:1;min-width:150px"><span>Comfort line</span><div class="k-field__box"><span>£</span><input id="sv-cf" type="number" inputmode="decimal" value="2000"></div></label></div>
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:12px">${virtualAccounts() ? backupBtn() : `<button class="k-btn k-btn--primary" type="button" data-setup-savings>Set it up</button><a class="k-btn k-btn--ghost" href="/accounts?sheet=account&t=savings">Add a different account</a>`}</div></div>`;
+    const focusBtn = `<button class="k-btn" type="button" data-focus-setup>${any ? 'Add a savings account' : 'Set up savings'}</button>`;
+    root.innerHTML = tabs + `<div class="plan-grid"><div class="stack" style="gap:var(--space-4)"><section class="k-card" id="sv-card" style="gap:var(--space-3)"><span class="k-label">Lowest point in the next 12 months</span>${setup}</section>
+      <section class="k-card" style="gap:var(--space-2)"><div class="row between"><h2 class="h-card">Planned buys</h2><a class="k-link hit" href="/plan/buys">See all</a></div>${emptyHtml('Plan a sofa, a holiday, a new car', 'Each one is a drop on the savings line. It needs a savings account to come out of.', focusBtn)}</section>
+      <section class="k-card" style="gap:var(--space-2)"><h2 class="h-card">Month by month</h2>${emptyHtml('Your balance at the end of each month', 'It fills in once there is a savings account.', focusBtn)}</section></div>
+      <div class="stack" style="gap:var(--space-4)"><section class="k-card" style="gap:var(--space-3)"><h2 class="h-card">Try a change</h2>${emptyHtml('Try saving more or less each month', 'The sliders and comfort line appear once there is a savings account.', focusBtn)}
+        <div class="row between" style="gap:var(--space-3);align-items:center"><div style="min-width:0"><b style="font-weight:500">Income from work</b><div class="hint">${escapeHtml(basisSummary())}</div></div><button class="k-btn" type="button" data-open-sheet="income">Change</button></div></section></div></div>
+    <div class="grid-2"><section class="k-card" style="gap:var(--space-3)"><div class="row between"><h2 class="h-card">Money coming in each month <span class="hint" style="font-weight:400">after tax</span></h2><button class="k-link hit" type="button" data-open-sheet="streams">Edit</button></div>${income0.html}</section>
+      <section class="k-card" style="gap:var(--space-3)"><div class="row between"><h2 class="h-card">Where it goes</h2><span class="muted">average of last 3 months</span></div>${whereItGoes(income0.total)}</section></div>`;
+    return; }
   const base = st.list.length === 1 ? st.list[0] : st.sum, comfort = base.comfort;
   const baseSeries = (() => { const list = st.list.map(p => { const a = p.a, t = planTry[a.id]; return projectAccount(a, {business: includeBusiness() && !!businessForecast, scope: w, saving: storedSaving(a), comfort: a.comfortLine || 0}); }); return list.length === 1 ? list[0] : sumProjection(list); })();
   const tried = st.list.some(p => planTry[p.a.id] && (planTry[p.a.id].saving != null || planTry[p.a.id].comfort != null));
@@ -1996,15 +2037,15 @@ function renderPlan(){
     <p class="hint">The least you're happy to keep here. A plan that takes savings below it turns red.</p>
     <div class="slider"><div class="slider__top"><label for="sl-${escapeHtml(a.id)}">Save into ${escapeHtml(a.name)} each month</label><span class="slider__val tnum" id="slv-${escapeHtml(a.id)}">${money(sv,{dp:0})}</span></div><input class="k-slider" id="sl-${escapeHtml(a.id)}" type="range" min="0" max="${max}" step="10" value="${sv}" style="--k-fill:${Math.round(sv/max*100)}%" data-slider="${escapeHtml(a.id)}"><div class="slider__scale"><span>£0</span><span>${money(max,{dp:0})}</span></div></div></div>`; }).join('');
   const room = Math.max(0, Math.floor(over / 50) * 50), nextLow = low;
-  const shortP = st.list.filter(p => p.shortFrom).sort((x,y) => x.shortFrom.localeCompare(y.shortFrom))[0], shortHint = shortP ? `<p class="hint" style="color:var(--ink)">From ${escapeHtml(monthLong(shortP.shortFrom))} your income on this basis doesn't cover the ${money(shortP.saving,{dp:0})} saving. Savings grow by less.</p>` : '';
-  const sugg = ok && room >= 100 ? `<div class="k-banner k-banner--smart">${icon('smart')}<span>Suggested: you have room for one more buy of up to ${money(room,{dp:0})} before ${escapeHtml(lowName)}${st.list.length === 1 ? ' from ' + escapeHtml(st.list[0].a.name) : ''}. <button class="k-link" type="button" data-open-sheet="buy">Plan one</button></span></div>` : (!ok ? `<div class="k-banner k-banner--smart">${icon('smart')}<span>To stay above the line, save about ${money(Math.ceil((-over) / FORE_N / 10) * 10,{dp:0})} more a month, or move a buy later. <button class="k-link" type="button" data-try-fix="${Math.ceil((-over) / FORE_N / 10) * 10}">Try it</button></span></div>` : '');
+  const shortP = st.list.filter(p => p.shortFrom).sort((x,y) => x.shortFrom.localeCompare(y.shortFrom))[0], shortHint = shortP ? `<div class="k-banner k-banner--warn" role="status">${icon('warning')}<span>From ${escapeHtml(monthLong(shortP.shortFrom))} your income on this basis doesn't cover the ${money(shortP.saving,{dp:0})} saving. Savings grow by less.</span></div>` : '';
+  const sugg = multi && ok ? '' : ok && room >= 100 ? `<div class="k-banner k-banner--smart">${icon('smart')}<span>Suggested: you have room for one more buy of up to ${money(room,{dp:0})} before ${escapeHtml(lowName)}${st.list.length === 1 ? ' from ' + escapeHtml(st.list[0].a.name) : ''}. <button class="k-link" type="button" data-open-sheet="buy">Plan one</button></span></div>` : (!ok ? `<div class="k-banner k-banner--smart">${icon('smart')}<span>To stay above the line, save about ${money(Math.ceil((-over) / FORE_N / 10) * 10,{dp:0})} more a month, or move a buy later. <button class="k-link" type="button" data-try-fix="${Math.ceil((-over) / FORE_N / 10) * 10}">Try it</button></span></div>` : '');
   const bizCan = !!businessForecast;
   const income = incomeSummary();
   root.innerHTML = tabs + `<p class="muted">${multi ? 'All ' + (['','one','two','three','four','five','six','seven','eight'][st.list.length] || st.list.length) + ' savings accounts added together · ' + money(st.list.reduce((s,p) => s + (accountBalance(p.a)||0), 0), {dp:0}) + ' today' : escapeHtml(acctPhrase(w, st.list))}</p><div class="plan-grid">
     <div class="stack" style="gap:var(--space-4)"><section class="k-card" style="gap:var(--space-3)">${head}<div class="plan-chart">${chart}</div>${shortHint}
       <div class="k-legend"><span><i></i>Savings</span><span><i style="border-top-width:1px;border-color:var(--ink-3)"></i>${multi ? 'Comfort total' : 'Comfort line'}</span>${tried ? '<span><i class="dash"></i>Your stored plan</span>' : ''}</div>
       <p class="hint">Starts from today's balance in each account. Spending and income this month aren't forecast separately: the monthly saving covers them.</p><p class="hint">Select a marker and use the arrow keys to move that buy by a month. <span class="sr-only" aria-live="polite" id="plan-live"></span></p></section>
-      ${multi ? eachSavingsHtml(st) : ''}<section class="k-card" style="gap:var(--space-2)"><div class="row between"><h2 class="h-card">Planned buys</h2><a class="k-link hit" href="/plan/buys">See all</a></div>${buys.length ? `<div class="flat-list">${buys.slice(0,3).map(b => buyRowHtml(b, {compact:true, owner: multi})).join('')}</div>` : '<p class="muted">Nothing planned yet. A sofa, a holiday, a new car: add it and watch the line.</p>'}<div><button class="k-btn" type="button" data-open-sheet="buy">${icon('plus')}Plan a buy</button></div></section>${monthByMonthHtml(cur, st)}</div>
+      ${multi ? eachSavingsHtml(st) : (w === 'all' ? `<section class="k-card" style="gap:var(--space-2);padding-top:var(--space-3)"><h2 class="h-card">Each savings account</h2>${emptyHtml('Compare each savings account against its own comfort line', 'Add a savings account for Mine or ' + escapeHtml(peopleNames().partner) + ' to compare them.', addAcctBtn('Add a savings account', '&t=savings&o=me'))}</section>` : '')}<section class="k-card" style="gap:var(--space-2)"><div class="row between"><h2 class="h-card">Planned buys</h2><a class="k-link hit" href="/plan/buys">See all</a></div>${buys.length ? `<div class="flat-list">${buys.slice(0,3).map(b => buyRowHtml(b, {compact:true, owner: multi})).join('')}</div>` : '<p class="muted">Nothing planned yet. A sofa, a holiday, a new car: add it and watch the line.</p>'}<div><button class="k-btn" type="button" data-open-sheet="buy">${icon('plus')}Plan a buy</button></div></section>${monthByMonthHtml(cur, st)}</div>
     <div class="stack" style="gap:var(--space-4)"><section class="k-card" style="gap:var(--space-3)"><div class="row between"><h2 class="h-card">Try a change</h2><button class="k-link hit" type="button" id="try-reset"${tried ? '' : ' disabled style="opacity:.4;cursor:default"'}>Reset</button></div>${ctl}${sugg}
       <div class="row between" style="gap:var(--space-3);align-items:center"><div style="min-width:0"><b style="font-weight:500">Income from work</b><div class="hint">${escapeHtml(basisSummary())}</div></div><button class="k-btn" type="button" data-open-sheet="income">Change</button></div>
       ${tried ? `<button class="k-btn k-btn--primary" type="button" id="try-make">Make this the plan</button>` : ''}</section></div></div>
@@ -2012,7 +2053,7 @@ function renderPlan(){
       <section class="k-card" style="gap:var(--space-3)"><div class="row between"><h2 class="h-card">Where it goes</h2><span class="muted">average of last 3 months</span></div>${whereItGoes(income.total)}</section></div>`;
 }
 function basisSummary(){
-  const b = incomeBasis(); if (!businessForecast) return 'Nothing from Logbook yet';
+  const b = incomeBasis(); if (!businessForecast) return 'Nothing from Logbook yet. To connect it, open Logbook › Settings › Kodu Finance › Connect.';
   if (b === 'off') return 'Left out. Salaries only (after tax).';
   if (b === 'signed' || b === 'invoiced') return (b === 'signed' ? 'Based on signed work' : 'Based on invoices sent') + ' · ' + money(businessAmount(monthKeyAtOffset(1)),{dp:0}) + ' next month, after tax';
   const n = +b.slice(3), have = receivedHistory().length; return `Based on the last ${Math.min(n, have) || n} months · ${money(avgOf(n),{dp:0})} a month after tax`;
@@ -2139,7 +2180,7 @@ SHEETS.income = (host) => {
   const bars = vals => { const mx = Math.max(1, ...vals); return `<div class="bars" aria-hidden="true">${vals.map(v => `<i class="${v ? '' : 'z'}" style="height:${Math.round(v / mx * 40)}px"></i>`).join('')}</div>`; };
   const runs = vals => { let last = -1; vals.forEach((v,i) => { if (v > 0) last = i; }); return last; };
   const sOpt = (k, title, blurb) => { const v = series(k), ok = !!v, tot = ok ? v.reduce((a,b) => a + b, 0) : 0, last = ok ? runs(v) : -1;
-    return `<button class="basis" type="button" role="radio" data-basis="${k}" aria-checked="${st.b===k}" aria-disabled="${!ok}"><div class="basis__head"><span class="basis__dot"></span><div><b style="font-weight:500;font-size:16px">${title}</b><div class="muted">${blurb}${ok ? ' · ' + money(tot,{dp:0}) + (last >= 0 ? ' over ' + (last+1) + ' month' + (last===0?'':'s') : '') : ''}</div></div></div>${ok ? bars(v) + `<div class="hint" style="padding-left:34px">${last >= 0 && last < FORE_N - 1 ? 'Runs out after ' + escapeHtml(monthLong(monthKeyAtOffset(last+1))) + '. After that it counts £0.' : (last < 0 ? 'Nothing signed yet.' : '')}</div>` : '<div class="hint" style="padding-left:34px">Coming from Logbook</div>'}</button>`; };
+    return `<button class="basis" type="button" role="radio" data-basis="${k}" aria-checked="${st.b===k}" aria-disabled="${!ok}"><div class="basis__head"><span class="basis__dot"></span><div><b style="font-weight:500;font-size:16px">${title}</b><div class="muted">${blurb}${ok ? ' · ' + money(tot,{dp:0}) + (last >= 0 ? ' over ' + (last+1) + ' month' + (last===0?'':'s') : '') : ''}</div></div></div>${ok ? bars(v) + `<div class="hint" style="padding-left:34px">${last >= 0 && last < FORE_N - 1 ? 'Runs out after ' + escapeHtml(monthLong(monthKeyAtOffset(last+1))) + '. After that it counts £0.' : (last < 0 ? 'Nothing signed yet.' : '')}</div>` : '<div class="hint" style="padding-left:34px">Coming from Logbook. In Logbook open Settings › Kodu Finance › Connect.</div>'}</button>`; };
   const hist = receivedHistory().length;
   const avgBtn = n => `<button type="button" data-avg="${n}" aria-pressed="${st.b==='avg'+n}"${hist ? '' : ' disabled'}>${n} months<br><span style="font-size:12px">${hist ? money(avgOf(n),{dp:0}) : '–'}</span></button>`;
   const body = () => `<p class="muted">Your work income changes month to month. Pick the figure the forecast should trust. All figures are after tax, from Logbook.</p><div role="radiogroup" aria-label="Base income from work on" class="stack" style="gap:var(--space-1)">
@@ -2248,7 +2289,7 @@ function renderBusiness(){
   if (routeNow.screen === 'income') document.getElementById('top-sub').textContent = topSub('income');
   const imp = `<button class="k-btn" type="button" id="btn-business-import">Import a file instead</button><input type="file" id="business-file" accept=".json,application/json" style="display:none">`;
   const err = incomeError ? `<div class="k-banner k-banner--negative">${icon('warning')}<span>${escapeHtml(incomeError)}</span></div>` : '';
-  if (!f){ root.innerHTML = `<div class="stack" style="max-width:640px">${err}<div class="k-empty"><b>Nothing from Logbook yet</b>Logbook sends this each time it changes.</div>${imp}</div>`; return; }
+  if (!f){ root.innerHTML = `<div class="stack" style="max-width:640px">${err}<div class="k-empty"><b>Nothing from Logbook yet</b>Logbook sends this each time it changes. To connect it, open Logbook › Settings › Kodu Finance › Connect.</div>${imp}</div>`; return; }
   const prov = f.tax_rate_is_provisional ? 'Tax is provisional until the accountant confirms it. ' : '';
   const hasE = f.months.some(m => typeof m.earned === 'number'), min = f.target_monthly ? f.target_monthly.min : null;
   const target = f.target_monthly ? `Your earnings target is ${gbp(f.target_monthly.min)}–${gbp(f.target_monthly.max)} a month, measured on work done that month${hasE ? '; months under it show in red.' : '. Earned figures haven\'t arrived from Logbook yet.'}` : '';
@@ -2399,7 +2440,7 @@ function renderDashboard(){
   const w = curWho('overview'), monShort = new Date(mk+'-01T12:00').toLocaleString('en-GB',{month:'short'}), monFull = new Date(mk+'-01T12:00').toLocaleString('en-GB',{month:'long'});
   const budgetOf = o => categories.filter(c => catScopeOk(c, o)).reduce((s,c) => s + budgetForCategory(c, mk), 0), spentOf = o => categories.filter(c => catScopeOk(c, o)).reduce((s,c) => s + actualForCategory(c.name, o, mk), 0);
   const totalBudget = budgetOf(w), totalActual = spentOf(w), left = totalBudget - totalActual;
-  const split = w === 'all' ? ['joint','me','partner'].map(o => ({o, left: budgetOf(o) - spentOf(o), has: budgetOf(o) > 0 || spentOf(o) > 0})).filter(x => x.has) : [];
+  const split = w === 'all' ? ['joint','me','partner'].map(o => ({o, left: budgetOf(o) - spentOf(o), has: budgetOf(o) > 0 || spentOf(o) > 0})): [];
   const need = [];
   inboxItems.filter(i => i.status === 'need').forEach(i => need.push(`<a class="k-item" href="/inbox"><span class="k-item__icon k-item__icon--warn">${icon('document')}</span><div class="k-item__text"><span class="k-item__title">Which account is “${escapeHtml(i.fileName)}”?</span><span class="k-item__meta">1 new file couldn't be matched</span></div><span class="k-item__trail"><span class="k-btn k-btn--sm">Choose</span></span></a>`));
   const wait = waitingAccounts().filter(a => w === 'all' || a.owner === w), mine = wait.filter(a => a.owner !== 'partner'), theirs = wait.filter(a => a.owner === 'partner');
@@ -2415,16 +2456,16 @@ function renderDashboard(){
   const lastBal = liveAccounts().map(a => a.balanceDate).filter(Boolean).sort().pop();
   const savs = savingsIn(w === 'joint' ? 'joint' : w).filter(a => true), stat = savs.map(a => { const p = projectAccount(a, {business: includeBusiness() && !!businessForecast, scope:'all'}); return {a, p, ok: p.low.v >= p.comfort}; });
   const nextBuy = buysList().filter(b => b.month >= mk && (w === 'all' || (accIdx.byId[b.accountId]||{}).owner === w || w === 'joint' && (accIdx.byId[b.accountId]||{}).owner === 'joint'))[0];
-  root.innerHTML = `<div class="grid-2"><div class="stack" style="gap:var(--space-6)">
-    <section class="k-card k-card--hero"><div class="row between"><span class="k-label">${escapeHtml(w==='all'?'Left to spend in '+monFull:ownerName(w)+' left to spend in '+monShort)}</span><span class="muted tnum">${totalBudget ? 'of ' + money(totalBudget) : ''}</span></div><div class="hero-figure tnum">${money(left)}</div>${totalBudget ? meterHtml(totalActual,totalBudget,true) : ''}
-      ${split.length ? `<div class="split3">${split.map(x => `<a href="/spending/${mk}?who=${x.o}">${whoBadge(x.o)}<span><span class="muted">${escapeHtml(ownerName(x.o))}</span><b class="tnum">${money(x.left)}</b></span></a>`).join('')}</div>` : ''}</section>
-    <section class="k-section"><div class="k-section__head"><h2>To do ${need.length ? `<span class="count">${need.length}</span>` : ''}</h2></div>${need.length ? `<div class="k-list">${need.join('')}</div>` : `<div class="k-card"><b>Nothing to do</b><span class="muted">Everything is sorted for ${escapeHtml(monShort)}.</span></div>`}
-      ${done}${theirs.length ? `<p class="hint">Still waiting for ${escapeHtml(peopleNames().partner)}'s ${escapeHtml(theirs.map(a => a.name).join(' and '))} ${escapeHtml(monthName(prevMonthKey()).split(' ')[0])} file. Nothing to do until they download it.</p>` : ''}</section></div>
+  root.innerHTML = whoEmptyHtml(w) + `<div class="grid-2"><div class="stack" style="gap:var(--space-6)">
+    <section class="k-card k-card--hero"><div class="row between"><span class="k-label">${escapeHtml(w==='all'?'Left to spend in '+monFull:ownerName(w)+' left to spend in '+monShort)}</span><span class="muted tnum">${totalBudget ? 'of ' + money(totalBudget) : ''}</span></div><div class="hero-figure tnum">${totalBudget ? money(left) : 'No budget yet'}</div>${totalBudget ? meterHtml(totalActual,totalBudget,true) : `<div class="row between" style="gap:var(--space-3);flex-wrap:wrap"><span class="muted">Set a budget to see what's left each month.</span><a class="k-btn k-btn--sm" href="/spending/${mk}?sheet=newcat">Add a budget</a></div>`}
+      ${split.length ? `<div class="split3">${split.map(x => `<a href="/spending/${mk}?who=${x.o}">${whoBadge(x.o)}<span><span class="muted">${escapeHtml(ownerName(x.o))}</span>${x.has ? `<b class="tnum">${money(x.left)}</b>` : '<span class="muted">No budget</span>'}</span></a>`).join('')}</div>` : ''}</section>
+    <section class="k-section"><div class="k-section__head"><h2>To do ${need.length ? `<span class="count">${need.length}</span>` : ''}</h2></div>${need.length ? `<div class="k-list">${need.join('')}</div>` : (virtualAccounts() ? `<div class="k-card">${emptyHtml('Download a backup', 'Then your accounts, the Inbox and Plan switch on.', backupBtn())}</div>` : !statements.some(x => x.month === mk || x.month === prevMonthKey()) ? `<div class="k-card">${emptyHtml("Add this month's bank files", 'Nothing has been read yet.', '<a class="k-btn" href="/inbox">Open Inbox</a>')}</div>` : `<div class="k-card" style="gap:2px"><b>Nothing to do</b><span class="muted">Everything is sorted for ${escapeHtml(monShort)}.</span></div>`)}
+      ${done || (!need.length ? '' : `<div class="k-card">${emptyHtml('Add your first bank files and balances update by themselves', 'Nothing has been read yet.', '<a class="k-btn" href="/inbox">Open Inbox</a>')}</div>`)}${theirs.length ? `<p class="hint">Still waiting for ${escapeHtml(peopleNames().partner)}'s ${escapeHtml(theirs.map(a => a.name).join(' and '))} ${escapeHtml(monthName(prevMonthKey()).split(' ')[0])} file. Nothing to do until they download it.</p>` : ''}</section></div>
     <div class="stack" style="gap:var(--space-6)">
     <section class="k-section"><div class="k-section__head"><h2>Money in accounts</h2>${lastBal ? `<span class="muted" style="margin-left:auto;margin-right:var(--space-3)">to ${escapeHtml(shortDate(lastBal.slice(0,10)))}</span>` : ''}<a class="k-link hit" href="/accounts">All ${liveAccounts().length}</a></div>
-      <div class="k-card" style="padding:0 var(--space-4)"><div class="flat-list">${owners.map(o => `<a class="k-item" href="/accounts" style="min-height:56px">${whoBadge(o)}<div class="k-item__text"><span class="k-item__title">${escapeHtml(ownerName(o))}</span><span class="k-item__meta">${acctsOf(o).length} account${acctsOf(o).length===1?'':'s'}</span></div><span class="k-amount tnum">${money(ownerTotalOf(o))}</span></a>`).join('') || '<p class="muted" style="padding:16px 0">No accounts yet.</p>'}</div></div></section>
-    ${stat.length ? `<section class="k-section"><div class="k-section__head"><h2>Savings</h2><a class="k-link hit" href="/plan?who=${w==='all'?'all':w}">Plan</a></div><div class="k-card" style="padding:0 var(--space-4)"><div class="flat-list">${stat.map(x => `<a class="k-item" href="/plan?who=${x.a.owner}" style="min-height:56px">${whoBadge(x.a.owner)}<div class="k-item__text"><span class="k-item__title">${escapeHtml(x.a.name)}</span><span class="k-item__meta">Lowest ${money(x.p.low.v,{dp:0})}${x.p.low.i ? ' in ' + escapeHtml(monthShort(x.p.pts[x.p.low.i].mk)) : ''} · comfort ${money(x.p.comfort,{dp:0})}</span></div><span class="k-item__trail">${x.ok ? `<span class="pill-ok">${icon('check',16)}OK</span>` : '<span class="k-tag k-tag--negative">Low</span>'}</span></a>`).join('')}</div></div>
-      ${nextBuy ? `<a class="k-card" href="/plan/buys" style="text-decoration:none;color:inherit;padding:var(--space-4);display:flex;flex-direction:column;gap:6px;margin-top:var(--space-3)"><div class="row between"><span class="row" style="gap:10px"><span class="goal__emoji" style="width:36px;height:36px">${icon(nextBuy.icon,20)}</span><span><span class="k-label" style="display:block">Next planned buy</span><b style="font-weight:600">${escapeHtml(nextBuy.name)} · ${escapeHtml(monthLong(nextBuy.month))}</b></span></span><span class="k-amount tnum">${money(-nextBuy.amount,{dp:0})}</span></div></a>` : ''}</section>` : ''}
+      <div class="k-card" style="padding:0 var(--space-4)"><div class="flat-list">${owners.map(o => `<a class="k-item" href="/accounts" style="min-height:56px">${whoBadge(o)}<div class="k-item__text"><span class="k-item__title">${escapeHtml(ownerName(o))}</span><span class="k-item__meta">${acctsOf(o).length} account${acctsOf(o).length===1?'':'s'}</span></div><span class="k-amount tnum">${money(ownerTotalOf(o))}</span></a>`).join('') || `<div style="padding:8px 0">${emptyHtml('Your accounts and what is in them', virtualAccounts() ? 'Download a backup and your two accounts are set up.' : 'No accounts yet.', addAcctBtn('Add account'))}</div>`}</div></div></section>
+    ${!stat.length ? `<section class="k-section"><div class="k-section__head"><h2>Savings</h2><a class="k-link hit" href="/plan">Plan</a></div><div class="k-card">${savingsEmptyHtml()}</div></section>` : ''}${stat.length ? `<section class="k-section"><div class="k-section__head"><h2>Savings</h2><a class="k-link hit" href="/plan?who=${w==='all'?'all':w}">Plan</a></div><div class="k-card" style="padding:0 var(--space-4)"><div class="flat-list">${stat.map(x => `<a class="k-item" href="/plan?who=${x.a.owner}" style="min-height:56px">${whoBadge(x.a.owner)}<div class="k-item__text"><span class="k-item__title">${escapeHtml(x.a.name)}</span><span class="k-item__meta">Lowest ${money(x.p.low.v,{dp:0})}${x.p.low.i ? ' in ' + escapeHtml(monthShort(x.p.pts[x.p.low.i].mk)) : ''} · comfort ${money(x.p.comfort,{dp:0})}</span></div><span class="k-item__trail">${x.ok ? `<span class="pill-ok">${icon('check',16)}OK</span>` : '<span class="k-tag k-tag--negative">Low</span>'}</span></a>`).join('')}</div></div>
+      ${nextBuy ? `<a class="k-card" href="/plan/buys" style="text-decoration:none;color:inherit;padding:var(--space-4);display:flex;flex-direction:column;gap:6px;margin-top:var(--space-3)"><div class="row between"><span class="row" style="gap:10px"><span class="goal__emoji" style="width:36px;height:36px">${icon(nextBuy.icon,20)}</span><span><span class="k-label" style="display:block">Next planned buy</span><b style="font-weight:600">${escapeHtml(nextBuy.name)} · ${escapeHtml(monthLong(nextBuy.month))}</b></span></span><span class="k-amount tnum">${money(-nextBuy.amount,{dp:0})}</span></div></a>` : `<div class="k-card" style="margin-top:var(--space-3)">${emptyHtml('Plan a buy to see what it does to your savings', 'Nothing is planned yet.', '<button class="k-btn" type="button" data-open-sheet="buy">Plan a buy</button>')}</div>`}</section>` : ''}
     </div></div>`;
   selectedMonth = prevSel;
 }
@@ -2450,7 +2491,7 @@ function renderAccounts(){
   const desc = {joint:'Shared by both of you. Household budgets and bills come from here.', me:'Your own accounts.', partner:'Their own accounts.'};
   root.innerHTML = owners.map(o => { const list = acctsOf(o);
     return `<section class="k-section"><div class="k-section__head owner-head"><h2 class="row" style="gap:10px">${whoBadge(o)}${escapeHtml(ownerName(o))}<span class="muted tnum" style="font-weight:400;font-size:15px">${money(ownerTotalOf(o))}</span></h2><span class="muted">${escapeHtml(desc[o])}</span></div>
-    ${list.length ? `<div class="k-card acct-list">${list.map(a => acctRowHtml(a, wait.has(a.id))).join('')}</div>` : `<div class="k-card"><div class="k-empty"><b>No accounts here yet</b>Add one and its statements will land here.</div></div>`}</section>`; }).join('');
+    ${list.length ? `<div class="k-card acct-list">${list.map(a => acctRowHtml(a, wait.has(a.id))).join('')}</div>` : `<div class="k-card">${emptyHtml('No accounts here yet', 'Add one and its statements will land here.', addAcctBtn(o === 'joint' ? 'Add account' : 'Add an account for ' + escapeHtml(personName(o)), '&o=' + o))}</div>`}</section>`; }).join('');
 }
 function accountsSub(){ const n = liveAccounts().length, upd = statements.map(s => s.importedAt).filter(Boolean).sort().pop(); return n + ' account' + (n===1?'':'s') + (upd ? ' · updated ' + lastStampText(upd) : ''); }
 function lastStampText(iso){ const d = new Date(iso); if (isNaN(d)) return ''; const same = d.toDateString() === new Date().toDateString(); return same ? 'today at ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
@@ -2459,7 +2500,7 @@ function lastStampText(iso){ const d = new Date(iso); if (isNaN(d)) return ''; c
 SHEETS.account = (host, id) => {
   const a = id ? accounts.find(x => x.id === id) : null;
   if (id && !a){ host.style.display = 'none'; host.innerHTML = ''; if (accounts.length) dropSheetFromUrl(); return; }
-  const n = peopleNames(), st = {type: a ? a.type : 'current', owner: a ? a.owner : (curWho('accounts') === 'me' || curWho('accounts') === 'partner' ? curWho('accounts') : 'joint')};
+  const qp = new URLSearchParams(location.search), n = peopleNames(), st = {type: a ? a.type : (['current','credit','savings'].includes(qp.get('t')) ? qp.get('t') : 'current'), owner: a ? a.owner : (['joint','me','partner'].includes(qp.get('o')) ? qp.get('o') : curWho('accounts') === 'me' || curWho('accounts') === 'partner' ? curWho('accounts') : 'joint')};
   const seg = (name, opts, cur) => `<div class="k-seg" role="group" data-seg="${name}">${opts.map(([v,l]) => `<button type="button" data-v="${v}" aria-pressed="${v===cur}">${escapeHtml(l)}</button>`).join('')}</div>`;
   const rules = a && a.rules ? a.rules : {};
   host.innerHTML = sheetShell(a ? escapeHtml(a.name) : 'Add an account', `
@@ -2511,13 +2552,13 @@ function renderSettings(){
     <div class="k-card"><h2 class="card-h">The two of you</h2>
       <div class="row" style="flex-wrap:wrap;align-items:flex-start"><label class="k-field" style="flex:1;min-width:180px"><span>Your name</span><div class="k-field__box"><input id="set-me" value="${escapeHtml((settingsDoc.people||{}).me||'')}" placeholder="Me" autocomplete="off"></div></label>
       <label class="k-field" style="flex:1;min-width:180px"><span>Their name</span><div class="k-field__box"><input id="set-partner" value="${escapeHtml((settingsDoc.people||{}).partner||'')}" placeholder="Partner" autocomplete="off"></div></label></div>
-      <p class="hint">Shown on account badges and in "Showing". Initials come from these names.</p></div>
+      <p class="hint">${(settingsDoc.people||{}).partner ? 'Shown on account badges and in "Showing". Initials come from these names.' : "Add your partner's name so the app uses it everywhere."}</p></div>
     <div class="k-card"><h2 class="card-h">Accounts</h2><p class="muted">${liveAccounts().length} accounts. Add, change or hide them on the Accounts screen.</p><a class="k-btn" href="/accounts">Open Accounts</a></div>
     <div class="k-card"><h2 class="card-h">Backup</h2><p class="muted">Download everything in Kodu Finance as one file you can keep. Do this before big changes.</p><button class="k-btn" type="button" id="btn-backup">Download a backup</button></div>
     <div class="k-card"><h2 class="card-h">Reminders</h2><label class="k-toggle"><span class="k-toggle__text"><span>Bill reminders on this device</span><span class="hint">${canNotify ? 'Only while Kodu Finance is open in a tab' : 'This browser can\'t show reminders'}</span></span><span class="k-switch"><input type="checkbox" id="notif-switch"${on?' checked':''}${canNotify?'':' disabled'}><span></span></span></label></div>
     <p class="hint">Kodu Finance ${escapeHtml(APP_VERSION)} · Your data is only readable by the two of you.</p></div>`;
 }
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#btn-signout')){ auth().signOut(); } if (e.target.closest && e.target.closest('#btn-backup, #btn-backup-first')) downloadBackup(); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#btn-signout')){ auth().signOut(); } if (e.target.closest && e.target.closest('#btn-backup, #btn-backup-first, [data-backup]')) downloadBackup(); });
 document.addEventListener('change', e => {
   if (e.target.id !== 'set-me' && e.target.id !== 'set-partner') return;
   const me = document.getElementById('set-me').value.trim(), pa = document.getElementById('set-partner').value.trim();
