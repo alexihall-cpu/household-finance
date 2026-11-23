@@ -1,0 +1,10 @@
+{
+  "name": "kodu-finance",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kodu Finance. The app is index.html; netlify/functions serve Ask about a line.",
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "@anthropic-ai/sdk": "^0.121.0"
+  }
+}

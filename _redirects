@@ -1,1 +1,5 @@
-/*  /index.html  200
+/api/ask   /.netlify/functions/ask       200
+/api/inbound /.netlify/functions/inbound 200
+/api/research /.netlify/functions/research-background 200
+/ask/*     /.netlify/functions/ask-page  200
+/*         /index.html                   200
