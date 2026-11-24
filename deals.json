@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updated": "2026-11-23T03:00:00Z",
+ "updated": "2026-11-24T03:00:00Z",
  "deals": [
   {
    "id": "bank-switch-santander-2026-10",
@@ -49,7 +49,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": "2026-10-27",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -106,7 +106,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": "2026-10-01",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -132,7 +132,8 @@
     "Within 60 days: full switch with 2 direct debits",
     "Within 60 days: pay in £2,000",
     "Within 60 days: spend £500 on the debit card",
-    "Credit check"
+    "Credit check",
+    "MSE says open by 4pm 25 Nov; HSBC's terms say until withdrawn"
    ],
    "rules": {
     "fullSwitch": true,
@@ -159,9 +160,9 @@
    "url": "https://www.hsbc.co.uk/current-accounts/products/bank-account/",
    "termsUrl": null,
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": null,
+   "validFrom": "2026-06-15",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -216,7 +217,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": "2026-09-14",
    "validTo": "2026-12-02",
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -238,7 +239,7 @@
     "unit": "GBP one-off"
    },
    "conditions": [
-    "Open and start the full switch by 8 Jan 2027",
+    "Start the switch by 9 Dec to be safe (Lloyds' page says 8 Jan 2027; MSE and an older Lloyds page say 9 Dec)",
     "The old account must already have 3 active direct debits",
     "Can't switch from Halifax or Bank of Scotland",
     "£5 a month fee, waived in any month you pay in £2,000",
@@ -274,7 +275,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": null,
    "validTo": "2027-01-08",
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -327,7 +328,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": "2026-11-16",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -381,7 +382,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": "2026-05-21",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -421,7 +422,8 @@
    },
    "excludes": {
     "text": [
-     "Not if you held a NatWest current account on 6 May 2026"
+     "Not if you held a NatWest current account on 6 May 2026",
+     "Not if anyone named has ever had a NatWest, RBS or Ulster Bank switch bonus"
     ],
     "groups": [
      "NatWest",
@@ -436,7 +438,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -483,7 +485,7 @@
    "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -531,7 +533,7 @@
    "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -579,7 +581,7 @@
    "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -627,7 +629,7 @@
    "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -675,7 +677,7 @@
    "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -721,7 +723,7 @@
    "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -767,7 +769,7 @@
    "source": "https://www.moneysavingexpert.com/savings/best-cash-isa/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "savings"
@@ -816,7 +818,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -865,7 +867,7 @@
    "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -888,6 +890,7 @@
    },
    "conditions": [
     "No annual fee",
+    "Cashback only once you spend £3,000 or more in a card year",
     "Not if you've had a personal Amex card in the last 24 months",
     "Credit check",
     "Pay in full each month or interest wipes out the gain"
@@ -918,7 +921,7 @@
    "source": "https://www.moneysavingexpert.com/credit-cards/cashback-credit-cards/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "current-account"
@@ -966,7 +969,7 @@
    "source": "https://www.moneysavingexpert.com/utilities/are-there-any-cheap-fixed-energy-deals-currently-worth-it/",
    "validFrom": "2026-11-18",
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "energy"
@@ -990,7 +993,7 @@
    "conditions": [
     "Effective price includes a £95 voucher",
     "Availability depends on your address",
-    "Ends 1 Dec 2026"
+    "Ends 8.59am Tue 1 Dec 2026"
    ],
    "rules": {
     "fullSwitch": null,
@@ -1014,7 +1017,7 @@
    "source": "https://www.moneysavingexpert.com/compare-broadband-deals/",
    "validFrom": null,
    "validTo": "2026-12-01",
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "broadband"
@@ -1029,7 +1032,7 @@
    "provider": "iD Mobile",
    "group": null,
    "title": "Unlimited data SIM for about £13 a month",
-   "summary": "12-month SIM-only, unlimited data.",
+   "summary": "12-month SIM-only, unlimited data: £4 a month for 3 months, then £16 (about £13 a month on average).",
    "value": {
     "text": "About £13 a month",
     "amount": 13,
@@ -1061,7 +1064,7 @@
    "source": "https://www.moneysavingexpert.com/cheap-mobile-finder/sim-only/",
    "validFrom": null,
    "validTo": null,
-   "checkedAt": "2026-11-23",
+   "checkedAt": "2026-11-24",
    "match": {
     "needs": [
      "mobile"
@@ -1083,20 +1086,20 @@
    },
    "date": "2026-10-01",
    "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "ofgem-cap-2027-q1-announce",
    "kind": "energy",
    "title": "Ofgem announces the January cap on 25 Nov",
    "value": {
-    "text": "Forecast about +26% (Cornwall Insight £2,166)",
+    "text": "Forecast about +26% (MSE/Cornwall £2,169); announced 25 Nov",
     "amount": null,
     "unit": "GBP per year"
    },
    "date": "2026-11-25",
    "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "boe-base-rate",
@@ -1109,7 +1112,7 @@
    },
    "date": "2026-11-05",
    "url": "https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "mot-max-fee",
@@ -1122,7 +1125,7 @@
    },
    "date": null,
    "url": "https://www.gov.uk/getting-an-mot/mot-test-fees",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "tv-licence-2026",
@@ -1135,20 +1138,20 @@
    },
    "date": "2026-04-01",
    "url": "https://www.gov.uk/government/news/cost-of-tv-licence-fee-set-for-202627",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "isa-allowance-2026-27",
    "kind": "isa",
    "title": "ISA allowance 2026/27",
    "value": {
-    "text": "£20,000; tax year ends 5 Apr 2027",
+    "text": "£20,000; tax year ends 5 Apr 2027. The planned £12,000 cash ISA cap was scrapped, so cash ISAs stay at £20,000",
     "amount": 20000,
     "unit": "GBP per year"
    },
    "date": "2027-04-05",
    "url": "https://www.gov.uk/government/publications/budget-2026-overview-of-tax-legislation-and-rates-ootlar/budget-2026-overview-of-tax-legislation-and-rates-ootlar",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   },
   {
    "id": "car-tax-standard",
@@ -1161,7 +1164,7 @@
    },
    "date": "2026-04-01",
    "url": "https://www.gov.uk/vehicle-tax-rate-tables",
-   "checkedAt": "2026-11-23"
+   "checkedAt": "2026-11-24"
   }
  ]
 }

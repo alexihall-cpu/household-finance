@@ -452,6 +452,10 @@
 .sheet-actions{flex-wrap:wrap;}
 .chip-break{display:none;} @media (min-width:900px){ .chip-break{display:block;flex-basis:100%;height:0;} }
 .mn-ov__r > b, .mn-ov__r > .tnum, .mn-idea .tnum{white-space:nowrap;flex-shrink:0;margin-left:var(--space-3);}
+.sort-ctl--inline{margin-left:auto;} .sort-phone{display:none;} .k-chips{position:relative;}
+@media (max-width:899px){ .sort-ctl--inline{display:none !important;} .sort-phone{display:flex;justify-content:flex-end;} }
+@media (min-width:900px){ .sort-ctl--inline{display:inline-flex !important;} }
+@media (max-width:899px){ .screen .k-chips{margin-left:calc(var(--space-4) * -1);margin-right:calc(var(--space-4) * -1);padding-left:var(--space-4);padding-right:var(--space-4);} .screen{overflow-x:clip;} }
 </style>
 </head>
 <body>
@@ -509,7 +513,7 @@
   </header>
 
   <div id="backup-banner" style="display:none;padding-top:var(--space-3)"></div>
-  <div class="hide-desktop" style="padding:0 var(--space-4) var(--space-3)"><div class="k-chips" id="who-chips" role="group" aria-label="Whose money"></div></div>
+  <div class="hide-desktop" style="padding:0 var(--space-5) var(--space-3);overflow-x:clip"><div class="k-chips" id="who-chips" role="group" aria-label="Whose money"></div></div>
   <main>
     <div id="who-banner" class="screen" style="display:none;padding-bottom:var(--space-4)"></div>
 
@@ -558,7 +562,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v44 · 2026-11-23';
+const APP_VERSION = 'v44.1 · 2026-11-24';
 
 /* =====================================================================
    FIREBASE CONFIG — paste the values from your Firebase project here
@@ -855,7 +859,7 @@ function attachListeners(){
   unsubscribers.push(base.collection('settings').doc('profile').onSnapshot(snap => {
     settingsDoc = snap.exists ? snap.data() : {};
     renderShell(); renderSettings(); renderDashboard(); renderAccounts(); renderTransactions(); renderCard();
-    renderForecast();
+    renderForecast(); renderMoney();
   }));
 }
 let scanDone = false, stmtReady = false;
@@ -1271,6 +1275,7 @@ function renderTransactions(){
   }
   const empty = q ? `<div class="k-empty"><b>Nothing matches “${escapeHtml(routeNow.q)}”</b>Search looks through every month.</div>`
     : `<div class="k-empty"><b>No transactions here</b>${filter==='all'?'Add a statement to fill this month.<div style="margin-top:12px"><a class="k-btn" href="/inbox">Open Inbox</a></div>':'Nothing in this filter for this month.'}</div>`;
+  const sortCtl = cls => `<span class="${cls}" style="display:inline-flex;gap:var(--space-2);align-items:center"><label class="k-field" style="margin:0;width:auto;min-width:0"><span class="sr-only">Sort by</span><div class="k-field__box"><select id="txn-sort" aria-label="Sort by">${SORTS.map(x => `<option value="${x[0]}"${x[0]===sortKey?' selected':''}>Sort: ${x[1]}</option>`).join('')}</select></div></label><a class="k-chip" id="txn-dir" href="${(() => { const u = new URL(txnUrl(mk, filter, routeNow.q), location.origin); u.searchParams.set('dir', sortDir === 'asc' ? 'desc' : 'asc'); return u.pathname + u.search; })()}" aria-label="${sortDir === 'asc' ? 'Ascending, switch to descending' : 'Descending, switch to ascending'}">${sortDir === 'asc' ? '↑ Ascending' : '↓ Descending'}</a></span>`;
   root.innerHTML = whoEmptyHtml(curWho('transactions')) + `<div class="stack">
     ${txnSummaryHtml(mk)}
     <form class="k-field" id="txn-search-form" role="search" style="margin:0"><label class="sr-only" for="txn-q">Search</label><div class="k-field__box">${icon('search')}<input id="txn-q" type="search" placeholder="Search all accounts and months" value="${escapeHtml(qv)}" autocomplete="off"></div></form>
@@ -1278,7 +1283,8 @@ function renderTransactions(){
     <div class="k-chips" role="group" aria-label="Account" style="align-items:center"><a class="k-chip" href="${txnUrl(mk, filter, routeNow.q, '')}" aria-pressed="${!routeNow.account}" data-chip>All accounts</a>${liveAccounts().filter(a => w === 'all' || a.owner === w || w === 'joint').map(a => `<a class="k-chip" href="${txnUrl(mk, filter, routeNow.q, a.id)}" aria-pressed="${a.id===routeNow.account}" data-chip>${escapeHtml(a.name)}</a>`).join('')}</div>
     <div class="k-chips k-chips--fade" role="group" aria-label="Filters" style="align-items:center">${chips}
       ${(fset.length || routeNow.account || q || yr) ? `<a class="k-link" style="font:400 14px/1 var(--font-sans)" href="${txnUrl(mk, 'all', '', '')}" data-clear-filters>Clear filters</a>` : ''}
-      <span class="sort-ctl" style="margin-left:auto;display:inline-flex;gap:var(--space-2);align-items:center"><label class="k-field" style="margin:0;width:auto;min-width:0"><span class="sr-only">Sort by</span><div class="k-field__box"><select id="txn-sort" aria-label="Sort by">${SORTS.map(x => `<option value="${x[0]}"${x[0]===sortKey?' selected':''}>Sort: ${x[1]}</option>`).join('')}</select></div></label><a class="k-chip" id="txn-dir" href="${(() => { const u = new URL(txnUrl(mk, filter, routeNow.q), location.origin); u.searchParams.set('dir', sortDir === 'asc' ? 'desc' : 'asc'); return u.pathname + u.search; })()}" aria-label="${sortDir === 'asc' ? 'Ascending, switch to descending' : 'Descending, switch to ascending'}">${sortDir === 'asc' ? '↑ Ascending' : '↓ Descending'}</a></span></div>
+      ${sortCtl('sort-ctl sort-ctl--inline')}</div>
+    <div class="sort-phone">${sortCtl('sort-ctl')}</div>
     ${rows.length ? `<div class="hide-desk">${phone}</div><div class="hide-phone">${desk}</div>` : (whoEmptyHtml(w) ? '' : !q && filter === 'all' && w !== 'all' && !yr ? whoViewEmpty(new Date(mk + '-01T12:00').toLocaleString('en-GB',{month:'long'})) : empty)}
   </div>`;
 }
@@ -3398,8 +3404,8 @@ function renderMoney(){
   root.innerHTML = `<div class="stack" style="gap:var(--space-4)">${moneyTabs(tab)}${tab === 'ideas' ? moneyIdeasHtml(D) : tab === 'switches' ? moneySwitchesHtml(D) : moneyRenewalsHtml(D)}</div>`;
 }
 function moneyOverviewCard(){
-  if (!dataReady.transactions || !accounts.length) return ''; const D = moneyData(), top = D.ideas.filter(i => i.value && i.endsOn && mDiff(D.today, i.endsOn) >= 0 && mDiff(D.today, i.endsOn) <= 14)[0], ren = D.renewals.filter(r => (r.status === 'now' || r.status === 'soon') && mDiff(D.today, r.lookFrom) <= 14)[0];
-  const late = moneyLate(D)[0]; if (!top && !ren && !late) return '';
+  if (!dataReady.transactions || !accounts.length) return ''; const D = moneyData(), top0 = D.ideas.filter(i => i.value && i.endsOn && mDiff(D.today, i.endsOn) >= 0 && mDiff(D.today, i.endsOn) <= 14)[0], ren = D.renewals.filter(r => (r.status === 'now' || r.status === 'soon') && mDiff(D.today, r.lookFrom) <= 14)[0];
+  const late = moneyLate(D)[0], top = top0 || D.ideas.find(i => i.value) || null; if (!top && !ren && !late) return '';   // quiet version when nothing is urgent
   return `<section class="k-section"><div class="k-section__head"><h2>Make the most</h2></div><a class="k-card mn-ov" href="${late ? '/plan/money/switches' : '/plan/money'}"><div class="row between"><span class="k-label">${escapeHtml(((late ? ['1 to chase'] : []).concat(D.ideas.filter(i => i.value).length ? [D.ideas.filter(i => i.value).length + (D.ideas.filter(i => i.value).length === 1 ? ' idea' : ' ideas') + ' · about ' + money(D.worth, {dp: 0})] : []).concat(ren ? ['1 renewal soon'] : [])).join(' · ').toUpperCase())}</span></div>
     ${late ? `<div class="row between mn-ov__r"><span style="min-width:0"><span class="k-tag k-tag--warn">${icon('warning', 14)} ${late.days} days late</span><br><b>Your ${escapeHtml(late.s.deal.provider)} bonus is late · Chase it</b></span></div>` : ''}
     ${top ? `<div class="row between mn-ov__r"><span style="min-width:0">${top.endsOn && mDiff(D.today, top.endsOn) <= 21 && mDiff(D.today, top.endsOn) >= 0 ? `<span class="k-tag k-tag--warn">${icon('warning', 14)} Ends ${escapeHtml(mDateTxt(top.endsOn))}</span><br>` : ''}<b>${escapeHtml(top.title)}</b></span><b class="tnum">+${escapeHtml(money(top.value, {dp: 0}))}</b></div>` : ''}
@@ -3598,7 +3604,7 @@ SHEETS.account = (host, id) => {
 function researchCardHtml(){
   const r = researchStatus, f = dealsFeed, when = iso => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'}) + ' ' + d.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'}); };
   const state = !r ? 'Not run yet' : r.state === 'running' ? 'Running now' : r.state === 'ok' ? 'Last run worked' : r.state === 'error' ? 'Last run failed' : r.state === 'dry-run-ok' ? 'Setup check passed' : r.state;
-  const rows = [['Status', state], r && r.finishedAt ? ['Last run', when(r.finishedAt)] : null, f ? ['Deals in the feed', String(f.count || (f.deals || []).length)] : null, r && r.costUsd != null ? ['Cost of the last run', '$' + Number(r.costUsd).toFixed(2) + (r.searches ? ' · ' + r.searches + ' searches' : '')] : null, r && r.plan ? ['Cost cap per run', '$' + Number(r.plan.capUsd).toFixed(2)] : null].filter(Boolean);
+  const rows = [['Status', state], r && r.finishedAt ? [r.state === 'dry-run-ok' ? 'Last checked' : 'Last run', when(r.finishedAt) + (r.state === 'dry-run-ok' ? ' · setup OK' : '')] : null, f ? ['Deals in the feed', String(f.count || (f.deals || []).length)] : null, r && r.costUsd != null ? ['Cost of the last run', '$' + Number(r.costUsd).toFixed(2) + (r.searches ? ' · ' + r.searches + ' searches' : '')] : null, r && r.plan ? ['Cost cap per run', '$' + Number(r.plan.capUsd).toFixed(2)] : null].filter(Boolean);
   return `<div class="k-card"><h2 class="card-h">Research engine</h2><p class="muted">Every night the app looks up public deals (bank switches, energy, broadband, mobile, insurance, cashback). Only public facts are sent; matching against your own accounts happens here, in your browser.</p>
     <dl class="k-dl">${rows.map(x => `<dt>${escapeHtml(x[0])}</dt><dd>${escapeHtml(x[1])}</dd>`).join('')}</dl>
     ${r && r.error ? `<div class="k-banner k-banner--warn">${icon('warning')}<span style="flex:1">${escapeHtml(r.error)}</span></div>` : ''}

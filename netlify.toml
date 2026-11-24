@@ -2,4 +2,4 @@
   directory = "netlify/functions"
 
 [functions."research"]
-  schedule = "30 2 * * *"
+  # PAUSED 24 Nov (API spend): schedule = "30 2 * * *"
