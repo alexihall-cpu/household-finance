@@ -562,7 +562,7 @@
 <script>
 /* Bump this string every time the file is updated — shown in the header
    so you can confirm your browser is actually running the latest deploy. */
-const APP_VERSION = 'v44.1 · 2026-11-24';
+const APP_VERSION = 'v44.2 · 2026-11-27';
 
 /* =====================================================================
    FIREBASE CONFIG — paste the values from your Firebase project here
@@ -1354,7 +1354,7 @@ function askBoxHtml(t){
       <button class="k-btn k-btn--primary" type="button" id="ask-send"${hasMail ? '' : ' disabled'}>Send to ${escapeHtml(n.partner)}</button>`;
   }
   const who = m => m.from === 'partner' ? {g: I.partner, name: n.partner} : {g: I.me, name: n.me};
-  const msgs = (q.messages || []).map(m => { const w = who(m), via = m.from === 'me' ? (q.emailed ? ' · emailed to ' + n.partner : ' · not emailed yet') : m.via === 'email' ? ' · from the email' : m.via === 'page' ? ' · from the reply page' : '';
+  const msgs = (q.messages || []).map(m => { const w = who(m), via = m.from === 'me' ? (q.emailed ? (q.emailedTo === 'owner-test' ? ' · test email to you' : ' · emailed to ' + n.partner) : ' · not emailed yet') : m.via === 'email' ? ' · from the email' : m.via === 'page' ? ' · from the reply page' : '';
     return `<div class="row" style="gap:12px;align-items:flex-start"><span class="k-who" aria-hidden="true">${escapeHtml(w.g)}</span><div style="min-width:0"><b class="ask-who">${escapeHtml(w.name)}</b> <span class="hint">${escapeHtml(qWhen(m.at))}${escapeHtml(via)}</span>${m.pick ? `<div class="row" style="gap:8px;margin-top:2px"><span class="muted">Answered: ${escapeHtml(pickWord(m.pick))}</span></div>` : ''}${m.text ? `<div style="margin-top:2px;white-space:pre-wrap">${escapeHtml(m.text)}</div>` : ''}</div></div>`; }).join('');
   const l = qLast(q), pickOk = l && l.from === 'partner' && (l.pick === 'joint' || l.pick === 'me' || l.pick === 'partner'), cat = pickOk || (l && l.from === 'partner') ? catFromNote(l.text) : '', catNew = cat && normCat(cat) !== normCat(t.category || ''), whoNew = pickOk && whoseOf(t).k !== l.pick, sug = q.status !== 'done' && !q.suggestionDismissed && l && l.from === 'partner' && (whoNew || catNew);
   return `${head(q.status === 'done' ? '<span class="muted">Done</span>' : '<button class="k-link" type="button" id="ask-done" style="background:none;border:0;padding:0;cursor:pointer">Mark as done</button>')}
@@ -1364,21 +1364,23 @@ function askBoxHtml(t){
     ${sug ? `<div class="k-card k-card--smart ask-sugg"><span class="k-label">${icon('smart', 16)} From ${escapeHtml(n.partner)}'s answer</span><div style="font-size:15px">${whoNew && catNew ? 'Set Whose to <b style="font-weight:600">' + escapeHtml(pickWord(l.pick)) + '</b> and the category to <b style="font-weight:600">' + escapeHtml(cat) + '</b>?' : whoNew ? 'Set Whose to <b style="font-weight:600">' + escapeHtml(pickWord(l.pick)) + '</b>?' : 'Set the category to <b style="font-weight:600">' + escapeHtml(cat) + '</b>?'}</div><div class="row" style="gap:8px"><button class="k-btn k-btn--smart k-btn--sm" type="button" id="ask-apply" data-pick="${whoNew ? escapeHtml(l.pick) : ''}" data-cat="${catNew ? escapeHtml(cat) : ''}">${whoNew && catNew ? 'Apply both' : 'Apply'}</button><button class="k-btn k-btn--ghost k-btn--sm" type="button" id="ask-no">Not now</button></div></div>` : ''}
     ${q.status !== 'done' && q.emailed ? `<div class="row" style="align-items:flex-end;gap:var(--space-3)"><div class="k-field" style="flex:1"><label class="sr-only" for="ask-reply">Reply to ${escapeHtml(n.partner)}</label><div class="k-field__box"><textarea id="ask-reply" class="ask-ta" placeholder="Reply to ${escapeHtml(n.partner)}" style="min-height:48px"></textarea></div></div><button class="k-btn" type="button" id="ask-reply-send">Send</button></div>` : ''}`;
 }
+let askBusy = false;
 function askMount(host, id){
   const box = host.querySelector('#txn-ask'); if (!box) return;
   const draw = () => { const t = transactions.find(x => x.id === id); if (!t || !box.isConnected) return; const keep = document.activeElement && document.activeElement.id; const typed = {text: (box.querySelector('#ask-text') || {}).value, reply: (box.querySelector('#ask-reply') || {}).value};
     box.innerHTML = whoseSegHtml(t) + '<div class="stack" id="ask-box">' + askBoxHtml(t) + '</div>';
-    if (typed.text != null && box.querySelector('#ask-text')) box.querySelector('#ask-text').value = typed.text; if (typed.reply && box.querySelector('#ask-reply')) box.querySelector('#ask-reply').value = typed.reply; if (keep && box.querySelector('#' + keep)) box.querySelector('#' + keep).focus(); };
+    if (typed.text != null && box.querySelector('#ask-text')) box.querySelector('#ask-text').value = typed.text; if (typed.reply && box.querySelector('#ask-reply')) box.querySelector('#ask-reply').value = typed.reply; if (keep && box.querySelector('#' + keep)) box.querySelector('#' + keep).focus(); if (askBusy) box.querySelectorAll('#ask-send,#ask-reply-send').forEach(b => { b.disabled = true; }); };
   draw(); askRefresh = draw;
   box.addEventListener('click', async e => {
     const t = transactions.find(x => x.id === id), q = t && qOf(t), col = usersCol().collection('questions'), n = pn();
     const btn = e.target.closest('button'); if (!btn || !t) return;
-    const send = async (qid, extra) => { const r = await askCall(Object.assign({questionId: qid}, extra || {})); if (r.ok) toast('Emailed ' + n.partner); else { toast(r.why === 'not set up' ? 'Saved. Email isn\'t switched on yet.' : "Couldn't send. Try again."); usersCol().collection('questions').doc(qid).update({sendNote: r.why === 'not set up' ? 'off' : 'failed'}).catch(() => {}); } return r; };
-    if (btn.id === 'ask-send'){ const text = (box.querySelector('#ask-text').value || '').trim(); if (!text) return; btn.disabled = true;
+    const send = async (qid, extra) => { const r = await askCall(Object.assign({questionId: qid}, extra || {})); if (r.ok) toast(r.live ? 'Emailed ' + n.partner : 'Test email sent to you, not to ' + n.partner); else { toast(r.why === 'not set up' ? 'Saved. Email isn\'t switched on yet.' : "Couldn't send. Try again."); usersCol().collection('questions').doc(qid).update({sendNote: r.why === 'not set up' ? 'off' : 'failed'}).catch(() => {}); } return r; };
+    if ((btn.id === 'ask-send' || btn.id === 'ask-reply-send') && askBusy) return;
+    if (btn.id === 'ask-send'){ const text = (box.querySelector('#ask-text').value || '').trim(); if (!text) return; btn.disabled = true; askBusy = true; box.querySelector('#ask-text').value = '';
       try { const ref = await col.add({txnId: t.id, to: 'partner', status: 'waiting', emailed: false, createdAt: firebase.firestore.FieldValue.serverTimestamp(), messages: [{from: 'me', text, at: new Date().toISOString(), via: 'app'}]});
-        await usersCol().collection('transactions').doc(t.id).update({questionId: ref.id}); send(ref.id); } catch (err){ btn.disabled = false; saveFail(err); } }
-    else if (btn.id === 'ask-reply-send' && q){ const text = (box.querySelector('#ask-reply').value || '').trim(); if (!text) return; btn.disabled = true;
-      col.doc(q.id).update({messages: firebase.firestore.FieldValue.arrayUnion({from: 'me', text, at: new Date().toISOString(), via: 'app'}), status: 'waiting', suggestionDismissed: false}).then(() => send(q.id, {reply: true})).catch(err => { btn.disabled = false; saveFail(err); }); }
+        await usersCol().collection('transactions').doc(t.id).update({questionId: ref.id}); await send(ref.id); askBusy = false; } catch (err){ askBusy = false; btn.disabled = false; const ta = box.querySelector('#ask-text'); if (ta) ta.value = text; saveFail(err); } }
+    else if (btn.id === 'ask-reply-send' && q){ const text = (box.querySelector('#ask-reply').value || '').trim(); if (!text) return; btn.disabled = true; askBusy = true; box.querySelector('#ask-reply').value = '';
+      col.doc(q.id).update({messages: firebase.firestore.FieldValue.arrayUnion({from: 'me', text, at: new Date().toISOString(), via: 'app'}), status: 'waiting', suggestionDismissed: false}).then(() => send(q.id, {reply: true})).then(() => { askBusy = false; }).catch(err => { askBusy = false; btn.disabled = false; const ta = box.querySelector('#ask-reply'); if (ta) ta.value = text; saveFail(err); }); }
     else if (btn.id === 'ask-retry' && q) send(q.id);
     else if (btn.id === 'ask-remind' && q) send(q.id, {reminder: true});
     else if (btn.id === 'ask-done' && q) col.doc(q.id).update({status: 'done'}).catch(saveFail);

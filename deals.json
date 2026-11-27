@@ -1,1170 +1,1076 @@
 {
- "version": 1,
- "updated": "2026-11-24T03:00:00Z",
- "deals": [
-  {
-   "id": "bank-switch-santander-2026-10",
-   "kind": "bank-switch",
-   "provider": "Santander",
-   "group": "Santander",
-   "title": "£240 to switch to Santander Everyday",
-   "summary": "Full switch, then within 60 days pay in £1,500, have 2 household direct debits and put £200 in a Regular Saver.",
-   "value": {
-    "text": "£240 cash",
-    "amount": 240,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Full switch requested on or after 27 Oct 2026",
-    "Within 60 days: pay in £1,500",
-    "Within 60 days: 2 household bill direct debits",
-    "Within 60 days: £200 or more into a Santander Regular Saver",
-    "Paid about 90 days after the switch"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 2,
-    "minPayIn": 1500,
-    "payInWithinDays": 60,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": 90
-   },
-   "excludes": {
-    "text": [
-     "Not if anyone named held a Santander current account on 1 Jan 2026",
-     "Not if you've had a Santander switch bonus before"
-    ],
-    "groups": [
-     "Santander",
-     "Cahoot"
-    ],
-    "bonusSince": null,
-    "heldSince": "2026-01-01"
-   },
-   "url": "https://www.santander.co.uk/landing/current-accounts/switching",
-   "termsUrl": "https://www.santander.co.uk/assets/s3fs-public/AD_documents/Santander_240_Switch_and_Save_offer_Terms_and_conditions_COREMC0855OCT26PUBCDT.pdf",
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-10-27",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 1500,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-barclays-2026-10",
-   "kind": "bank-switch",
-   "provider": "Barclays",
-   "group": "Barclays",
-   "title": "Up to £300 to switch to Barclays",
-   "summary": "£150 after a full switch with 3 direct debits and £2,000 salary, then £30 a month for 5 months.",
-   "value": {
-    "text": "£150 + 5 × £30",
-    "amount": 300,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Open in the Barclays app; sole accounts only",
-    "Full switch with 3 active direct debits, requested within 30 days",
-    "£2,000 salary within 30 days (from an employer, a pension, or your own UK business account)",
-    "Then each month for 5 months: £2,000 salary and 10 card payments for £30",
-    "Transfers from your own personal accounts don't count"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 3,
-    "minPayIn": 2000,
-    "payInWithinDays": 30,
-    "closeOld": true,
-    "jointAllowed": false,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": null,
-    "salaryOnly": true
-   },
-   "excludes": {
-    "text": [
-     "Not if you had a Barclays current account open on 1 Oct 2026",
-     "Not if you've had a Barclays switch bonus before",
-     "The £2,000 must be salary, a pension, or from your own UK business account; transfers from your own personal accounts don't count"
-    ],
-    "groups": [
-     "Barclays"
-    ],
-    "bonusSince": null,
-    "heldSince": "2026-10-01"
-   },
-   "url": "https://www.barclays.co.uk/current-accounts/switch-offer/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-10-01",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 2000,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-hsbc-2026-11",
-   "kind": "bank-switch",
-   "provider": "HSBC",
-   "group": "HSBC UK",
-   "title": "£220 to switch to HSBC",
-   "summary": "Open in the app, full switch with 2 direct debits, pay in £2,000 and spend £500 on the card within 60 days.",
-   "value": {
-    "text": "£220 cash",
-    "amount": 220,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Open in the HSBC app (sole account)",
-    "Within 60 days: full switch with 2 direct debits",
-    "Within 60 days: pay in £2,000",
-    "Within 60 days: spend £500 on the debit card",
-    "Credit check",
-    "MSE says open by 4pm 25 Nov; HSBC's terms say until withdrawn"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 2,
-    "minPayIn": 2000,
-    "payInWithinDays": 60,
-    "closeOld": true,
-    "jointAllowed": false,
-    "creditCheck": "hard",
-    "monthlyFee": 0,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you've held an HSBC or first direct current account since 1 Jan 2023"
-    ],
-    "groups": [
-     "HSBC UK",
-     "first direct"
-    ],
-    "bonusSince": null,
-    "heldSince": "2023-01-01"
-   },
-   "url": "https://www.hsbc.co.uk/current-accounts/products/bank-account/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-06-15",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 2000,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-firstdirect-2026-09",
-   "kind": "bank-switch",
-   "provider": "first direct",
-   "group": "HSBC UK",
-   "title": "£210 to switch to first direct (open by 2 Dec)",
-   "summary": "£175 plus a £35 boost for accounts opened by 2 Dec: switch with 2 direct debits or standing orders and pay in £1,000 within 45 days.",
-   "value": {
-    "text": "£210 cash (£175 after 2 Dec)",
-    "amount": 210,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Open by 2 Dec 2026 for the extra £35",
-    "Within 45 days: full switch with 2 direct debits or standing orders",
-    "Within 45 days: pay in £1,000",
-    "Within 45 days: 5 card payments and log on to digital banking"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 2,
-    "minPayIn": 1000,
-    "payInWithinDays": 45,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you've ever held a first direct product",
-     "Not if you opened an HSBC current account on or after 1 Jan 2018"
-    ],
-    "groups": [
-     "first direct",
-     "HSBC UK"
-    ],
-    "bonusSince": null,
-    "heldSince": "2018-01-01"
-   },
-   "url": "https://www.firstdirect.com/current-account/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-09-14",
-   "validTo": "2026-12-02",
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 1000,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-lloyds-2026-11",
-   "kind": "bank-switch",
-   "provider": "Lloyds",
-   "group": "Lloyds Banking Group",
-   "title": "£200 to switch to Club Lloyds (start by 8 Jan)",
-   "summary": "Open a Club Lloyds account and start a full switch with 3 direct debits by 8 Jan 2027. No pay-in needed for the bonus.",
-   "value": {
-    "text": "£200 cash",
-    "amount": 200,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Start the switch by 9 Dec to be safe (Lloyds' page says 8 Jan 2027; MSE and an older Lloyds page say 9 Dec)",
-    "The old account must already have 3 active direct debits",
-    "Can't switch from Halifax or Bank of Scotland",
-    "£5 a month fee, waived in any month you pay in £2,000",
-    "Paid within 14 working days of the switch"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 3,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 5,
-    "paidWithinDays": 20,
-    "feeWaivedPayIn": 2000
-   },
-   "excludes": {
-    "text": [
-     "Not if anyone named has had a Lloyds, Halifax or Bank of Scotland switch bonus since 1 Jan 2023",
-     "Can't switch from Halifax or Bank of Scotland"
-    ],
-    "groups": [
-     "Lloyds",
-     "Halifax",
-     "Bank of Scotland"
-    ],
-    "bonusSince": "2023-01-01",
-    "heldSince": null
-   },
-   "url": "https://www.lloydsbank.com/current-accounts/switch.html",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": null,
-   "validTo": "2027-01-08",
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-coop-2026-11",
-   "kind": "bank-switch",
-   "provider": "Co-op Bank",
-   "group": "Co-operative Bank",
-   "title": "Up to £200 to switch to Co-op Bank",
-   "summary": "£125 after a full switch, then £25 a month for 3 months.",
-   "value": {
-    "text": "£125 + 3 × £25",
-    "amount": 200,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Switch requested on or after 16 Nov 2026, completed within 8 weeks",
-    "Within 30 days: pay in £1,500, 2 active direct debits, 5 card payments",
-    "Register for online or mobile banking"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 2,
-    "minPayIn": 1500,
-    "payInWithinDays": 30,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you've had a Co-op switch offer since 1 Nov 2022"
-    ],
-    "groups": [
-     "Co-operative Bank",
-     "smile"
-    ],
-    "bonusSince": "2022-11-01",
-    "heldSince": null
-   },
-   "url": "https://www.co-operativebank.co.uk/products/bank-accounts/switch-offer/",
-   "termsUrl": "https://www.co-operativebank.co.uk/pdfs/bank/currentaccounts/switching/switch-offer-terms-and-conditions-nov-26.pdf",
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-11-16",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 1500,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-nationwide-2026-05",
-   "kind": "bank-switch",
-   "provider": "Nationwide",
-   "group": "Nationwide",
-   "title": "£175 to switch to Nationwide FlexDirect",
-   "summary": "Full switch with 2 direct debits, then pay in £1,000 and make 1 card payment within 31 days.",
-   "value": {
-    "text": "£175 cash",
-    "amount": 175,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Full switch with 2 active direct debits, done within 28 days",
-    "Within 31 days: pay in £1,000 and make 1 card payment",
-    "FlexDirect also pays 5% on up to £1,500 for 12 months if you pay in £1,500 a month"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": 2,
-    "minPayIn": 1000,
-    "payInWithinDays": 31,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you've had a Nationwide switch bonus on a sole account since 2021 (one sole and one joint allowed)",
-     "Can't switch from Nationwide or Virgin Money"
-    ],
-    "groups": [
-     "Nationwide",
-     "Virgin Money"
-    ],
-    "bonusSince": "2021-01-01",
-    "heldSince": null
-   },
-   "url": "https://www.nationwide.co.uk/current-accounts/switch",
-   "termsUrl": "https://www.nationwide.co.uk/-/assets/nationwidecouk/documents/current-accounts/resources/smd1863-current-account-switch-offer-terms.pdf",
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": "2026-05-21",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 1000,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "bank-switch-natwest-2026-05",
-   "kind": "bank-switch",
-   "provider": "NatWest",
-   "group": "NatWest Group",
-   "title": "£200 to switch to NatWest Reward",
-   "summary": "Full switch from a bank outside NatWest Group, then pay in £1,250 and log in to the app within 60 days.",
-   "value": {
-    "text": "£200 cash",
-    "amount": 200,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "Full switch from a bank outside NatWest Group",
-    "Within 60 days: pay in £1,250 and log in to the app",
-    "Reward account £2 a month (Select is free)"
-   ],
-   "rules": {
-    "fullSwitch": true,
-    "minDirectDebits": null,
-    "minPayIn": 1250,
-    "payInWithinDays": 60,
-    "closeOld": true,
-    "jointAllowed": true,
-    "creditCheck": null,
-    "monthlyFee": 2,
-    "paidWithinDays": null,
-    "feeWaivedPayIn": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you held a NatWest current account on 6 May 2026",
-     "Not if anyone named has ever had a NatWest, RBS or Ulster Bank switch bonus"
-    ],
-    "groups": [
-     "NatWest",
-     "Royal Bank of Scotland",
-     "Ulster Bank"
-    ],
-    "bonusSince": null,
-    "heldSince": "2026-05-06"
-   },
-   "url": "https://www.natwest.com/current-accounts/switch.html",
-   "termsUrl": "https://www.natwest.com/content/dam/natwest/personal/current-accounts/documents/switch-offer-terms/nw-switch-offer-terms-may-2026.pdf",
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 1250,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-regular-tembo",
-   "kind": "savings",
-   "provider": "Tembo",
-   "group": null,
-   "title": "8% regular saver, no current account needed",
-   "summary": "Save up to £250 a month at 8% for new customers.",
-   "value": {
-    "text": "8% AER on up to £250 a month",
-    "amount": 8,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "New customers",
-    "Up to £250 a month"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.tembomoney.com/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-regular-santander",
-   "kind": "savings",
-   "provider": "Santander",
-   "group": "Santander",
-   "title": "8% regular saver (with a Santander current account)",
-   "summary": "8% including a 5% bonus for 12 months, up to £200 a month.",
-   "value": {
-    "text": "8% AER on up to £200 a month",
-    "amount": 8,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "Needs a Santander current account",
-    "Up to £200 a month",
-    "Includes a 5% bonus for 12 months"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.santander.co.uk/personal/savings-and-investments/savings/regular-saver",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-regular-firstdirect",
-   "kind": "savings",
-   "provider": "first direct",
-   "group": "HSBC UK",
-   "title": "7% regular saver (with a first direct account)",
-   "summary": "7% fixed for 12 months on up to £300 a month.",
-   "value": {
-    "text": "7% AER on up to £300 a month",
-    "amount": 7,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "Needs a first direct 1st Account",
-    "Up to £300 a month",
-    "No withdrawals during the 12 months"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.firstdirect.com/savings/products/regular-saver/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-easy-santander-edge",
-   "kind": "savings",
-   "provider": "Santander",
-   "group": "Santander",
-   "title": "6% easy access on up to £4,000 (Edge customers)",
-   "summary": "Edge Saver pays 6% including a 2.5% bonus for 12 months; needs the Edge current account (£3 a month).",
-   "value": {
-    "text": "6% AER on up to £4,000",
-    "amount": 6,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "Needs Santander Edge current account (£3 a month)",
-    "Up to £4,000",
-    "Includes a 2.5% bonus for 12 months"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": 3,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.santander.co.uk/personal/current-accounts/santander-edge-current-account",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-easy-chase",
-   "kind": "savings",
-   "provider": "Chase",
-   "group": null,
-   "title": "4.75% easy access at Chase",
-   "summary": "2.5% plus a 2.25% boost for 12 months if opened in your first 31 days with Chase.",
-   "value": {
-    "text": "4.75% AER",
-    "amount": 4.75,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "Open within 31 days of joining Chase",
-    "Boost lasts 12 months",
-    "App only, sole only"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.chase.co.uk/gb/en/saver-boosted/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "savings-fix1-castletrust",
-   "kind": "savings",
-   "provider": "Castle Trust Bank",
-   "group": null,
-   "title": "5.27% one-year fixed",
-   "summary": "One-year fixed rate e-saver.",
-   "value": {
-    "text": "5.27% AER fixed for 1 year",
-    "amount": 5.27,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "Money locked for 1 year"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.castletrust.co.uk/savings/1-year-fixed-rate-e-saver/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "isa-easy-chip",
-   "kind": "savings",
-   "provider": "Chip",
-   "group": null,
-   "title": "4.87% easy-access cash ISA",
-   "summary": "Easy-access cash ISA; £20,000 a year allowance.",
-   "value": {
-    "text": "4.87% AER, tax-free",
-    "amount": 4.87,
-    "unit": "percent AER"
-   },
-   "conditions": [
-    "£20,000 ISA allowance a year (tax year ends 5 Apr 2027)"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.getchip.uk/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/savings/best-cash-isa/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "savings"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "reward-chase-cashback",
-   "kind": "current-account",
-   "provider": "Chase",
-   "group": null,
-   "title": "2% cashback on everyday spend at Chase",
-   "summary": "Free account; 2% back on groceries, eating out, transport and fuel, up to £20 a month.",
-   "value": {
-    "text": "Up to £20 a month",
-    "amount": 240,
-    "unit": "GBP per year"
-   },
-   "conditions": [
-    "Free, app only, sole only",
-    "15 or more card payments or direct debits a month",
-    "£1,000 or more kept in Chase savings",
-    "Capped at £20 a month"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": false,
-    "creditCheck": null,
-    "monthlyFee": 0,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.chase.co.uk/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "reward-santander-edge",
-   "kind": "current-account",
-   "provider": "Santander",
-   "group": "Santander",
-   "title": "1% back on household bills with Santander Edge",
-   "summary": "1% cashback on household bills, up to £10 a month; £3 a month fee.",
-   "value": {
-    "text": "Up to £120 a year, less £36 fee",
-    "amount": 84,
-    "unit": "GBP per year"
-   },
-   "conditions": [
-    "£3 a month fee",
-    "Pay in £500 a month",
-    "2 direct debits",
-    "1% on household bills, capped at £10 a month"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": 2,
-    "minPayIn": 500,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": 3,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.santander.co.uk/personal/current-accounts/santander-edge-current-account",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": 500,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "cashback-amex-everyday",
-   "kind": "cashback",
-   "provider": "American Express",
-   "group": null,
-   "title": "2% cashback for 12 months on the Amex Platinum Cashback Everyday",
-   "summary": "No fee; 2% for the first 12 months up to £200, then 0.5% to 1%.",
-   "value": {
-    "text": "Up to £200 in year one",
-    "amount": 200,
-    "unit": "GBP one-off"
-   },
-   "conditions": [
-    "No annual fee",
-    "Cashback only once you spend £3,000 or more in a card year",
-    "Not if you've had a personal Amex card in the last 24 months",
-    "Credit check",
-    "Pay in full each month or interest wipes out the gain"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": "hard",
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [
-     "Not if you've had a personal American Express card in the last 24 months"
-    ],
-    "groups": [
-     "American Express"
-    ],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.americanexpress.com/en-gb/credit-cards/platinum-cashback-everyday-credit-card/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/credit-cards/cashback-credit-cards/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "current-account"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "energy-fix-fuse-24m",
-   "kind": "energy",
-   "provider": "Fuse Energy",
-   "group": null,
-   "title": "Fix at about 2% above today's cap before the 1 Jan rise",
-   "summary": "Fuse 24-month fix, about 2.1% above the October cap; the January cap is forecast about 26% higher.",
-   "value": {
-    "text": "About 2% above today's cap",
-    "amount": null,
-    "unit": "GBP per year"
-   },
-   "conditions": [
-    "24-month fix, £50 per fuel exit fee",
-    "Monthly direct debit",
-    "January cap is a forecast until Ofgem announces on 25 Nov"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.fuseenergy.com/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/utilities/are-there-any-cheap-fixed-energy-deals-currently-worth-it/",
-   "validFrom": "2026-11-18",
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "energy"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "broadband-vodafone-150",
-   "kind": "broadband",
-   "provider": "Vodafone",
-   "group": null,
-   "title": "Full fibre 150 for about £18.63 a month after a £95 voucher",
-   "summary": "Cheapest 150Mb deal on MSE this week; ends 1 Dec.",
-   "value": {
-    "text": "About £18.63 a month effective",
-    "amount": 19,
-    "unit": "GBP per month"
-   },
-   "conditions": [
-    "Effective price includes a £95 voucher",
-    "Availability depends on your address",
-    "Ends 8.59am Tue 1 Dec 2026"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.vodafone.co.uk/broadband",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/compare-broadband-deals/",
-   "validFrom": null,
-   "validTo": "2026-12-01",
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "broadband"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  },
-  {
-   "id": "mobile-id-unlimited",
-   "kind": "mobile",
-   "provider": "iD Mobile",
-   "group": null,
-   "title": "Unlimited data SIM for about £13 a month",
-   "summary": "12-month SIM-only, unlimited data: £4 a month for 3 months, then £16 (about £13 a month on average).",
-   "value": {
-    "text": "About £13 a month",
-    "amount": 13,
-    "unit": "GBP per month"
-   },
-   "conditions": [
-    "12-month SIM-only",
-    "Keep your number: text PAC to 65075"
-   ],
-   "rules": {
-    "fullSwitch": null,
-    "minDirectDebits": null,
-    "minPayIn": null,
-    "payInWithinDays": null,
-    "closeOld": null,
-    "jointAllowed": null,
-    "creditCheck": null,
-    "monthlyFee": null,
-    "paidWithinDays": null
-   },
-   "excludes": {
-    "text": [],
-    "groups": [],
-    "bonusSince": null,
-    "heldSince": null
-   },
-   "url": "https://www.idmobile.co.uk/",
-   "termsUrl": null,
-   "source": "https://www.moneysavingexpert.com/cheap-mobile-finder/sim-only/",
-   "validFrom": null,
-   "validTo": null,
-   "checkedAt": "2026-11-24",
-   "match": {
-    "needs": [
-     "mobile"
-    ],
-    "minMonthlyIn": null,
-    "minMonthlySpend": null
-   }
-  }
- ],
- "facts": [
-  {
-   "id": "ofgem-cap-2026-q4",
-   "kind": "energy",
-   "title": "Energy price cap 1 Oct to 31 Dec 2026",
-   "value": {
-    "text": "£1,723 a year typical (GB average, direct debit)",
-    "amount": 1723,
-    "unit": "GBP per year"
-   },
-   "date": "2026-10-01",
-   "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "ofgem-cap-2027-q1-announce",
-   "kind": "energy",
-   "title": "Ofgem announces the January cap on 25 Nov",
-   "value": {
-    "text": "Forecast about +26% (MSE/Cornwall £2,169); announced 25 Nov",
-    "amount": null,
-    "unit": "GBP per year"
-   },
-   "date": "2026-11-25",
-   "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "boe-base-rate",
-   "kind": "savings",
-   "title": "Bank of England base rate",
-   "value": {
-    "text": "4.00%; next decision 17 Dec 2026",
-    "amount": 4.0,
-    "unit": "percent"
-   },
-   "date": "2026-11-05",
-   "url": "https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "mot-max-fee",
-   "kind": "car",
-   "title": "MOT maximum fee (car)",
-   "value": {
-    "text": "£54.85",
-    "amount": 54.85,
-    "unit": "GBP one-off"
-   },
-   "date": null,
-   "url": "https://www.gov.uk/getting-an-mot/mot-test-fees",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "tv-licence-2026",
-   "kind": "tv",
-   "title": "TV licence from 1 Apr 2026",
-   "value": {
-    "text": "£180 a year",
-    "amount": 180,
-    "unit": "GBP per year"
-   },
-   "date": "2026-04-01",
-   "url": "https://www.gov.uk/government/news/cost-of-tv-licence-fee-set-for-202627",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "isa-allowance-2026-27",
-   "kind": "isa",
-   "title": "ISA allowance 2026/27",
-   "value": {
-    "text": "£20,000; tax year ends 5 Apr 2027. The planned £12,000 cash ISA cap was scrapped, so cash ISAs stay at £20,000",
-    "amount": 20000,
-    "unit": "GBP per year"
-   },
-   "date": "2027-04-05",
-   "url": "https://www.gov.uk/government/publications/budget-2026-overview-of-tax-legislation-and-rates-ootlar/budget-2026-overview-of-tax-legislation-and-rates-ootlar",
-   "checkedAt": "2026-11-24"
-  },
-  {
-   "id": "car-tax-standard",
-   "kind": "car",
-   "title": "Car tax standard rate (incl. EVs)",
-   "value": {
-    "text": "£200 a year; +£440 a year for cars listed over £40k (EVs over £50k)",
-    "amount": 200,
-    "unit": "GBP per year"
-   },
-   "date": "2026-04-01",
-   "url": "https://www.gov.uk/vehicle-tax-rate-tables",
-   "checkedAt": "2026-11-24"
-  }
- ]
+  "version": 1,
+  "updated": "2026-11-27",
+  "deals": [
+    {
+      "id": "bank-switch-santander-2026-10",
+      "kind": "bank-switch",
+      "provider": "Santander",
+      "group": "Santander",
+      "title": "£240 to switch to Santander Everyday",
+      "summary": "Full switch, then within 60 days pay in £1,500, have 2 household direct debits and put £200 in a Regular Saver.",
+      "value": {
+        "text": "£240 cash (MSE adds a £25 voucher)",
+        "amount": 240,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Santander's page: offer ends 9 December 2026, may be withdrawn earlier",
+        "Full switch requested on or after 27 Oct 2026",
+        "Within 60 days: pay in £1,500",
+        "Within 60 days: 2 household bill direct debits",
+        "Within 60 days: £200 or more into a Santander Regular Saver",
+        "Paid about 90 days after the switch"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 2,
+        "minPayIn": 1500,
+        "payInWithinDays": 60,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": 90
+      },
+      "excludes": {
+        "text": [
+          "Not if anyone named held a Santander current account on 1 Jan 2026",
+          "Not if you've had a Santander switch bonus before"
+        ],
+        "groups": [
+          "Santander",
+          "Cahoot"
+        ],
+        "bonusSince": null,
+        "heldSince": "2026-01-01"
+      },
+      "url": "https://www.santander.co.uk/landing/current-accounts/switching",
+      "termsUrl": "https://www.santander.co.uk/assets/s3fs-public/AD_documents/Santander_240_Switch_and_Save_offer_Terms_and_conditions_COREMC0855OCT26PUBCDT.pdf",
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-10-27",
+      "validTo": "2026-12-09",
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 1500,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-barclays-2026-10",
+      "kind": "bank-switch",
+      "provider": "Barclays",
+      "group": "Barclays",
+      "title": "Up to £300 to switch to Barclays",
+      "summary": "£150 after a full switch with 3 direct debits and £2,000 salary, then £30 a month for 5 months.",
+      "value": {
+        "text": "£150 + 5 × £30",
+        "amount": 300,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Open in the Barclays app; sole accounts only",
+        "Full switch with 3 active direct debits, requested within 30 days",
+        "£2,000 salary within 30 days (from an employer, a pension, or your own UK business account)",
+        "Then each month for 5 months: £2,000 salary and 10 card payments for £30",
+        "Transfers from your own personal accounts don't count"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 3,
+        "minPayIn": 2000,
+        "payInWithinDays": 30,
+        "closeOld": true,
+        "jointAllowed": false,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": null,
+        "salaryOnly": true
+      },
+      "excludes": {
+        "text": [
+          "Not if you had a Barclays current account open on 1 Oct 2026",
+          "Not if you've had a Barclays switch bonus before",
+          "The £2,000 must be salary, a pension, or from your own UK business account; transfers from your own personal accounts don't count"
+        ],
+        "groups": [
+          "Barclays"
+        ],
+        "bonusSince": null,
+        "heldSince": "2026-10-01"
+      },
+      "url": "https://www.barclays.co.uk/current-accounts/switch-offer/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-10-01",
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 2000,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-hsbc-2026-11",
+      "kind": "bank-switch",
+      "provider": "HSBC",
+      "group": "HSBC UK",
+      "title": "£220 to switch to HSBC",
+      "summary": "Open in the app, full switch with 2 direct debits, pay in £2,000 and spend £500 on the card within 60 days.",
+      "value": {
+        "text": "£220 cash",
+        "amount": 220,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Open in the HSBC app (sole account)",
+        "Within 60 days: full switch with 2 direct debits",
+        "Within 60 days: pay in £2,000",
+        "Within 60 days: spend £500 on the debit card",
+        "Credit check",
+        "MSE says open by 4pm 25 Nov; HSBC's terms say until withdrawn"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 2,
+        "minPayIn": 2000,
+        "payInWithinDays": 60,
+        "closeOld": true,
+        "jointAllowed": false,
+        "creditCheck": "hard",
+        "monthlyFee": 0,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you've held an HSBC or first direct current account since 1 Jan 2023"
+        ],
+        "groups": [
+          "HSBC UK",
+          "first direct"
+        ],
+        "bonusSince": null,
+        "heldSince": "2023-01-01"
+      },
+      "url": "https://www.hsbc.co.uk/current-accounts/products/bank-account/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-06-15",
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 2000,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-firstdirect-2026-09",
+      "kind": "bank-switch",
+      "provider": "first direct",
+      "group": "HSBC UK",
+      "title": "£210 to switch to first direct (open by 2 Dec)",
+      "summary": "£175 plus a £35 boost for accounts opened by 2 Dec: switch with 2 direct debits or standing orders and pay in £1,000 within 45 days.",
+      "value": {
+        "text": "£210 cash (£175 after 2 Dec)",
+        "amount": 210,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Open by 2 Dec 2026 for the extra £35",
+        "Within 45 days: full switch with 2 direct debits or standing orders",
+        "Within 45 days: pay in £1,000",
+        "Within 45 days: 5 card payments and log on to digital banking"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 2,
+        "minPayIn": 1000,
+        "payInWithinDays": 45,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you've ever held a first direct product",
+          "Not if you opened an HSBC current account on or after 1 Jan 2018"
+        ],
+        "groups": [
+          "first direct",
+          "HSBC UK"
+        ],
+        "bonusSince": null,
+        "heldSince": "2018-01-01"
+      },
+      "url": "https://www.firstdirect.com/current-account/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-09-14",
+      "validTo": "2026-12-02",
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 1000,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-lloyds-2026-11",
+      "kind": "bank-switch",
+      "provider": "Lloyds",
+      "group": "Lloyds Banking Group",
+      "title": "£200 to switch to Club Lloyds (start by 8 Jan)",
+      "summary": "Open a Club Lloyds account and start a full switch with 3 direct debits by 8 Jan 2027. No pay-in needed for the bonus.",
+      "value": {
+        "text": "£200 cash",
+        "amount": 200,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Start the switch by 5 Dec to be paid before Christmas; offer runs to 8 Jan 2027",
+        "The old account must already have 3 active direct debits",
+        "Can't switch from Halifax or Bank of Scotland",
+        "£5 a month fee, waived in any month you pay in £2,000",
+        "Paid within 14 working days of the switch"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 3,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 5,
+        "paidWithinDays": 20,
+        "feeWaivedPayIn": 2000
+      },
+      "excludes": {
+        "text": [
+          "Not if anyone named has had a Lloyds, Halifax or Bank of Scotland switch bonus since 1 Jan 2023",
+          "Can't switch from Halifax or Bank of Scotland"
+        ],
+        "groups": [
+          "Lloyds",
+          "Halifax",
+          "Bank of Scotland"
+        ],
+        "bonusSince": "2023-01-01",
+        "heldSince": null
+      },
+      "url": "https://www.lloydsbank.com/current-accounts/switch.html",
+      "termsUrl": null,
+      "source": "https://www.lloydsbank.com/current-accounts/switch.html",
+      "validFrom": null,
+      "validTo": "2027-01-08",
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-coop-2026-11",
+      "kind": "bank-switch",
+      "provider": "Co-op Bank",
+      "group": "Co-operative Bank",
+      "title": "Up to £200 to switch to Co-op Bank",
+      "summary": "£125 after a full switch, then £25 a month for 3 months.",
+      "value": {
+        "text": "£125 + 3 × £25",
+        "amount": 200,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Switch requested on or after 16 Nov 2026, completed within 8 weeks",
+        "Within 30 days: pay in £1,500, 2 active direct debits, 5 card payments",
+        "Register for online or mobile banking"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 2,
+        "minPayIn": 1500,
+        "payInWithinDays": 30,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you've had a Co-op switch offer since 1 Nov 2022"
+        ],
+        "groups": [
+          "Co-operative Bank",
+          "smile"
+        ],
+        "bonusSince": "2022-11-01",
+        "heldSince": null
+      },
+      "url": "https://www.co-operativebank.co.uk/products/bank-accounts/switch-offer/",
+      "termsUrl": "https://www.co-operativebank.co.uk/pdfs/bank/currentaccounts/switching/switch-offer-terms-and-conditions-nov-26.pdf",
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-11-16",
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 1500,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-nationwide-2026-05",
+      "kind": "bank-switch",
+      "provider": "Nationwide",
+      "group": "Nationwide",
+      "title": "£175 to switch to Nationwide FlexDirect",
+      "summary": "Full switch with 2 direct debits, then pay in £1,000 and make 1 card payment within 31 days.",
+      "value": {
+        "text": "£175 cash",
+        "amount": 175,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Full switch with 2 active direct debits, done within 28 days",
+        "Within 31 days: pay in £1,000 and make 1 card payment",
+        "FlexDirect also pays 5% on up to £1,500 for 12 months if you pay in £1,500 a month"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": 2,
+        "minPayIn": 1000,
+        "payInWithinDays": 31,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you've had a Nationwide switch bonus on a sole account since 2021 (one sole and one joint allowed)",
+          "Can't switch from Nationwide or Virgin Money"
+        ],
+        "groups": [
+          "Nationwide",
+          "Virgin Money"
+        ],
+        "bonusSince": "2021-01-01",
+        "heldSince": null
+      },
+      "url": "https://www.nationwide.co.uk/current-accounts/switch",
+      "termsUrl": "https://www.nationwide.co.uk/-/assets/nationwidecouk/documents/current-accounts/resources/smd1863-current-account-switch-offer-terms.pdf",
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": "2026-05-21",
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 1000,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "bank-switch-natwest-2026-05",
+      "kind": "bank-switch",
+      "provider": "NatWest",
+      "group": "NatWest Group",
+      "title": "£200 to switch to NatWest Reward",
+      "summary": "Full switch from a bank outside NatWest Group, then pay in £1,250 and log in to the app within 60 days.",
+      "value": {
+        "text": "£200 cash",
+        "amount": 200,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "Full switch from a bank outside NatWest Group",
+        "Within 60 days: pay in £1,250 and log in to the app",
+        "Reward account £2 a month (Select is free)"
+      ],
+      "rules": {
+        "fullSwitch": true,
+        "minDirectDebits": null,
+        "minPayIn": 1250,
+        "payInWithinDays": 60,
+        "closeOld": true,
+        "jointAllowed": true,
+        "creditCheck": null,
+        "monthlyFee": 2,
+        "paidWithinDays": null,
+        "feeWaivedPayIn": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you held a NatWest current account on 6 May 2026",
+          "Not if anyone named has ever had a NatWest, RBS or Ulster Bank switch bonus"
+        ],
+        "groups": [
+          "NatWest",
+          "Royal Bank of Scotland",
+          "Ulster Bank"
+        ],
+        "bonusSince": null,
+        "heldSince": "2026-05-06"
+      },
+      "url": "https://www.natwest.com/current-accounts/switch.html",
+      "termsUrl": "https://www.natwest.com/content/dam/natwest/personal/current-accounts/documents/switch-offer-terms/nw-switch-offer-terms-may-2026.pdf",
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 1250,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-regular-tembo",
+      "kind": "savings",
+      "provider": "Tembo",
+      "group": null,
+      "title": "8% regular saver, no current account needed",
+      "summary": "Save up to £250 a month at 8% for new customers.",
+      "value": {
+        "text": "8% AER on up to £250 a month",
+        "amount": 8,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "New customers",
+        "Up to £250 a month"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.tembomoney.com/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-regular-santander",
+      "kind": "savings",
+      "provider": "Santander",
+      "group": "Santander",
+      "title": "8% regular saver (with a Santander current account)",
+      "summary": "8% including a 5% bonus for 12 months, up to £200 a month.",
+      "value": {
+        "text": "8% AER on up to £200 a month",
+        "amount": 8,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "Needs a Santander current account",
+        "Up to £200 a month",
+        "Includes a 5% bonus for 12 months"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.santander.co.uk/personal/savings-and-investments/savings/regular-saver",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-regular-firstdirect",
+      "kind": "savings",
+      "provider": "first direct",
+      "group": "HSBC UK",
+      "title": "7% regular saver (with a first direct account)",
+      "summary": "7% fixed for 12 months on up to £300 a month.",
+      "value": {
+        "text": "7% AER on up to £300 a month",
+        "amount": 7,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "Needs a first direct 1st Account",
+        "Up to £300 a month",
+        "No withdrawals during the 12 months"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.firstdirect.com/savings/products/regular-saver/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/best-regular-savings-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-easy-santander-edge",
+      "kind": "savings",
+      "provider": "Santander",
+      "group": "Santander",
+      "title": "6% easy access on up to £4,000 (Edge customers)",
+      "summary": "Edge Saver pays 6% including a 2.5% bonus for 12 months; needs the Edge current account (£3 a month).",
+      "value": {
+        "text": "6% AER on up to £4,000",
+        "amount": 6,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "Needs Santander Edge current account (£3 a month)",
+        "Up to £4,000",
+        "Includes a 2.5% bonus for 12 months"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": 3,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.santander.co.uk/personal/current-accounts/santander-edge-current-account",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-easy-chase",
+      "kind": "savings",
+      "provider": "Chase",
+      "group": null,
+      "title": "4.75% easy access at Chase",
+      "summary": "2.5% plus a 2.25% boost for 12 months if opened in your first 31 days with Chase.",
+      "value": {
+        "text": "4.75% AER",
+        "amount": 4.75,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "Open within 31 days of joining Chase",
+        "Boost lasts 12 months",
+        "App only, sole only"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.chase.co.uk/gb/en/saver-boosted/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "savings-fix1-castletrust",
+      "kind": "savings",
+      "provider": "Castle Trust Bank",
+      "group": null,
+      "title": "5.31% one-year fixed",
+      "summary": "One-year fixed rate e-saver.",
+      "value": {
+        "text": "5.31% AER fixed for 1 year",
+        "amount": 5.31,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "Money locked for 1 year"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.castletrust.co.uk/savings/1-year-fixed-rate-e-saver/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/savings-accounts-best-interest/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "isa-easy-chip",
+      "kind": "savings",
+      "provider": "Chip",
+      "group": null,
+      "title": "4.87% easy-access cash ISA",
+      "summary": "Easy-access cash ISA; £20,000 a year allowance.",
+      "value": {
+        "text": "4.87% AER, tax-free",
+        "amount": 4.87,
+        "unit": "percent AER"
+      },
+      "conditions": [
+        "£20,000 ISA allowance a year (tax year ends 5 Apr 2027)"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.getchip.uk/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/savings/best-cash-isa/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "savings"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "reward-chase-cashback",
+      "kind": "current-account",
+      "provider": "Chase",
+      "group": null,
+      "title": "2% cashback on everyday spend at Chase",
+      "summary": "Free account; 2% back on groceries, eating out, transport and fuel, up to £20 a month.",
+      "value": {
+        "text": "Up to £20 a month",
+        "amount": 240,
+        "unit": "GBP per year"
+      },
+      "conditions": [
+        "Free, app only, sole only",
+        "15 or more card payments or direct debits a month",
+        "£1,000 or more kept in Chase savings",
+        "Capped at £20 a month"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": false,
+        "creditCheck": null,
+        "monthlyFee": 0,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.chase.co.uk/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "reward-santander-edge",
+      "kind": "current-account",
+      "provider": "Santander",
+      "group": "Santander",
+      "title": "1% back on household bills with Santander Edge",
+      "summary": "1% cashback on household bills, up to £10 a month; £3 a month fee.",
+      "value": {
+        "text": "Up to £120 a year, less £36 fee",
+        "amount": 84,
+        "unit": "GBP per year"
+      },
+      "conditions": [
+        "£3 a month fee",
+        "Pay in £500 a month",
+        "2 direct debits",
+        "1% on household bills, capped at £10 a month"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": 2,
+        "minPayIn": 500,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": 3,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.santander.co.uk/personal/current-accounts/santander-edge-current-account",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/banking/compare-best-bank-accounts/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": 500,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "cashback-amex-everyday",
+      "kind": "cashback",
+      "provider": "American Express",
+      "group": null,
+      "title": "2% cashback for 12 months on the Amex Platinum Cashback Everyday",
+      "summary": "No fee; 2% for the first 12 months up to £200, then 0.5% to 1%.",
+      "value": {
+        "text": "Up to £200 in year one",
+        "amount": 200,
+        "unit": "GBP one-off"
+      },
+      "conditions": [
+        "No annual fee",
+        "Cashback only once you spend £3,000 or more in a card year",
+        "Not if you've had a personal Amex card in the last 24 months",
+        "Credit check",
+        "Pay in full each month or interest wipes out the gain"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": "hard",
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [
+          "Not if you've had a personal American Express card in the last 24 months"
+        ],
+        "groups": [
+          "American Express"
+        ],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.americanexpress.com/en-gb/credit-cards/platinum-cashback-everyday-credit-card/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/credit-cards/cashback-credit-cards/",
+      "validFrom": null,
+      "validTo": null,
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "current-account"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    },
+    {
+      "id": "energy-fix-fuse-24m",
+      "kind": "energy",
+      "provider": "Fuse Energy",
+      "group": null,
+      "title": "Fuse 24-month fix, 1.3% above today's cap",
+      "summary": "Fuse November 2026 Fixed (24m), 1.3% above the October cap and 19.4% below the January cap (£2,166, +26%). Ends 5pm Fri 27 Nov (MSE).",
+      "value": {
+        "text": "1.3% above today's cap",
+        "amount": null,
+        "unit": "GBP per year"
+      },
+      "conditions": [
+        "24-month fix, £50 per fuel exit fee",
+        "£20 dual-fuel cashback through MSE Cheap Energy Club",
+        "Ends 5pm Fri 27 Nov (MSE)"
+      ],
+      "rules": {
+        "fullSwitch": null,
+        "minDirectDebits": null,
+        "minPayIn": null,
+        "payInWithinDays": null,
+        "closeOld": null,
+        "jointAllowed": null,
+        "creditCheck": null,
+        "monthlyFee": null,
+        "paidWithinDays": null
+      },
+      "excludes": {
+        "text": [],
+        "groups": [],
+        "bonusSince": null,
+        "heldSince": null
+      },
+      "url": "https://www.fuseenergy.com/",
+      "termsUrl": null,
+      "source": "https://www.moneysavingexpert.com/energy/cec-tariff-1/",
+      "validFrom": "2026-11-18",
+      "validTo": "2026-11-27",
+      "checkedAt": "2026-11-27",
+      "match": {
+        "needs": [
+          "energy"
+        ],
+        "minMonthlyIn": null,
+        "minMonthlySpend": null
+      }
+    }
+  ],
+  "facts": [
+    {
+      "id": "ofgem-cap-2026-q4",
+      "kind": "energy",
+      "title": "Energy price cap 1 Oct to 31 Dec 2026",
+      "value": {
+        "text": "£1,723 a year typical (GB average, direct debit)",
+        "amount": 1723,
+        "unit": "GBP per year"
+      },
+      "date": "2026-10-01",
+      "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "ofgem-cap-2027-q1",
+      "kind": "energy",
+      "title": "Energy price cap 1 Jan to 31 Mar 2027",
+      "value": {
+        "text": "£2,166 a year typical (+26%), GB average, direct debit",
+        "amount": 2166,
+        "unit": "GBP per year"
+      },
+      "date": "2027-01-01",
+      "url": "https://www.ofgem.gov.uk/information-consumers/energy-advice-households/energy-price-cap",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "boe-base-rate",
+      "kind": "savings",
+      "title": "Bank of England base rate",
+      "value": {
+        "text": "4.00%; next decision 17 Dec 2026",
+        "amount": 4.0,
+        "unit": "percent"
+      },
+      "date": "2026-11-05",
+      "url": "https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "mot-max-fee",
+      "kind": "car",
+      "title": "MOT maximum fee (car)",
+      "value": {
+        "text": "£54.85",
+        "amount": 54.85,
+        "unit": "GBP one-off"
+      },
+      "date": null,
+      "url": "https://www.gov.uk/getting-an-mot/mot-test-fees",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "tv-licence-2026",
+      "kind": "tv",
+      "title": "TV licence from 1 Apr 2026",
+      "value": {
+        "text": "£180 a year",
+        "amount": 180,
+        "unit": "GBP per year"
+      },
+      "date": "2026-04-01",
+      "url": "https://www.gov.uk/government/news/cost-of-tv-licence-fee-set-for-202627",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "isa-allowance-2026-27",
+      "kind": "isa",
+      "title": "ISA allowance 2026/27",
+      "value": {
+        "text": "£20,000; tax year ends 5 Apr 2027. The planned £12,000 cash ISA cap was scrapped, so cash ISAs stay at £20,000",
+        "amount": 20000,
+        "unit": "GBP per year"
+      },
+      "date": "2027-04-05",
+      "url": "https://www.gov.uk/government/publications/budget-2026-overview-of-tax-legislation-and-rates-ootlar/budget-2026-overview-of-tax-legislation-and-rates-ootlar",
+      "checkedAt": "2026-11-27"
+    },
+    {
+      "id": "car-tax-standard",
+      "kind": "car",
+      "title": "Car tax standard rate (incl. EVs)",
+      "value": {
+        "text": "£200 a year; +£440 a year for cars listed over £40k (EVs over £50k)",
+        "amount": 200,
+        "unit": "GBP per year"
+      },
+      "date": "2026-04-01",
+      "url": "https://www.gov.uk/vehicle-tax-rate-tables",
+      "checkedAt": "2026-11-27"
+    }
+  ]
 }
